@@ -68,7 +68,7 @@ For CI/CD integration, I plan to use **GitHub Actions or Jenkins** for automatio
       - `mailosaur` → **For email testing and validation**.
 - **Challenges & Workarounds**:
   - Due to **restrictions in the production environment**, I couldn't log in via Cypress and run my test cases locally.
-  - However, the framework is designed to work seamlessly across environments with minor adjustments.
+  - However, the framework is designed to work seamlessly across environments with minor adjustments. There can be more improvements to this repo such as utilising web hooks for event triggers to make test cases run faster. Besides this the execution time can be increased in many other ways by utilising cy.intercept() functionality as well.
 
 ---
 
@@ -77,3 +77,29 @@ For CI/CD integration, I plan to use **GitHub Actions or Jenkins** for automatio
 This Cypress automation framework follows **modern best practices**, ensuring **speed, scalability, and reliability**.  
 It supports **multi-environment execution**, integrates smoothly into **CI/CD**, and enhances **test execution efficiency** with **parallelization and reporting mechanisms**.  
 By leveraging **API-first testing, shift-left methodologies, and a dynamic configuration setup**, this framework ensures **high-quality releases with minimal effort**. ✅
+
+### 🚀 **Installation & Execution Guide**
+
+1- Install Node
+2- Run the following command in your terminal to clone the repo:
+git clone https://github.com/aashir1998/Aashir-Mailer-Lite-Test-Assignment.git
+cd Aashir-Mailer-Lite-Test-Assignment
+3- npm install
+4- Create a .env file in the project root and add the necessary environment variables.
+
+**MAILER_LITE_API_URL=**
+**MAILER_LITE_EMAIL=**
+**MAILER_LITE_PASSWORD=**
+**CYPRESS_MAILOSAUR_API_KEY=**
+**CYPRESS_MAILOSAUR_SERVER_ID =**
+**MAILER_LITE_BASE_URL=**
+**MAILER_LITE_AUTH_TOKEN=**
+**MAILER_LITE_EMAIL_DOMAIN=**
+
+5- **npx cypress open** to run in UI or **npx cypress run** to run all the tests
+6- To run tests with tags :
+
+- **Smoke Tests** → `npm run e2e:smoke:tests`
+- **Regression Tests** → `npm run e2e:regression:tests`
+
+7- If origin changes after login, use cy.origin
