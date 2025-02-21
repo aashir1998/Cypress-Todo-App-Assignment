@@ -1,0 +1,44 @@
+{
+  "name": "aashir-mailer-lite-test-assignment",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "prettier-format": "prettier --config .prettierrc '**/*.js' --write",
+    "cy:verify": "cypress verify",
+    "cy:run": "cypress run",
+    "cy:open": "cypress open",
+    "e2e:smoke:tests": "cypress run --env grepTags=@Smoke,grepFilterSpecs=true ",
+    "e2e:regression:tests": "cypress run --env grepTags=@Regression,grepFilterSpecs=true"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aashir1998/Aashir-Mailer-Lite-Test-Assignment.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/aashir1998/Aashir-Mailer-Lite-Test-Assignment/issues"
+  },
+  "homepage": "https://github.com/aashir1998/Aashir-Mailer-Lite-Test-Assignment#readme",
+  "devDependencies": {
+    "@cypress/grep": "^4.1.0",
+    "@eslint/js": "^9.20.0",
+    "@faker-js/faker": "^9.5.0",
+    "cypress": "^14.0.3",
+    "cypress-mailosaur": "^2.17.0",
+    "cypress-mochawesome-reporter": "^3.8.2",
+    "cypress-plugin-api": "^2.11.2",
+    "cypress-recurse": "^1.35.3",
+    "dotenv": "^16.4.7",
+    "eslint": "^9.20.1",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-cypress": "^4.1.0",
+    "globals": "^15.15.0",
+    "import": "^0.0.6",
+    "mailosaur": "^8.8.1",
+    "prettier": "3.5.1"
+  }
+}
