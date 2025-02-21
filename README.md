@@ -67,7 +67,7 @@ For CI/CD integration, I plan to use **GitHub Actions or Jenkins** for automatio
       - `cypress-grep` → **For filtering tests using tags**.
       - `mailosaur` → **For email testing and validation**.
 - **Challenges & Workarounds**:
-  - Due to **restrictions in the production environment**, I couldn't log in via Cypress.
+  - Due to **restrictions in the production environment**, I couldn't log in via Cypress and run my test cases locally.
   - However, the framework is designed to work seamlessly across environments with minor adjustments.
 
 ---
