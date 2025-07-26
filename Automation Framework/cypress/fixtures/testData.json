@@ -1,0 +1,41 @@
+{
+  "loginData": {
+    "validCredentials": {
+      "email": "demo@example.com",
+      "password": "password",
+      "expectedUser": "Demo User"
+    },
+    "invalidCredentials": [
+      {
+        "email": "invalid@example.com",
+        "password": "wrongpassword",
+        "expectedError": "Invalid email or password. Use demo@example.com / password"
+      },
+      {
+        "email": "demo@example.com",
+        "password": "wrongpassword",
+        "expectedError": "Invalid email or password. Use demo@example.com / password"
+      },
+      {
+        "email": "invalid@example.com",
+        "password": "password",
+        "expectedError": "Invalid email or password. Use demo@example.com / password"
+      },
+      {
+        "email": "",
+        "password": "password",
+        "expectedError": "Invalid email or password. Use demo@example.com / password"
+      },
+      {
+        "email": "demo@example.com",
+        "password": "",
+        "expectedError": "Invalid email or password. Use demo@example.com / password"
+      },
+      {
+        "email": "",
+        "password": "",
+        "expectedError": "Invalid email or password. Use demo@example.com / password"
+      }
+    ]
+  }
+}
