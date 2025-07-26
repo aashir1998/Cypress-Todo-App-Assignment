@@ -31,23 +31,15 @@ module.exports = defineConfig({
     grepFilterSpecs: true,
     grepOmitFiltered: true,
 
-    // Visual testing
-    visualRegressionType: 'regression',
-
     // Performance testing
     performanceThreshold: 3000
   },
 
   e2e: {
     setupNodeEvents(on, config) {
+      // Essential plugins only
       require('@cypress/grep/src/plugin')(config);
       require('cypress-mochawesome-reporter/plugin')(on);
-
-      // Visual regression plugin
-      require('cypress-visual-regression/dist/plugin')(on, config);
-
-      // Terminal reporter
-      require('cypress-terminal-report/src/installLogsPrinter')(on);
 
       return config;
     },
@@ -59,8 +51,8 @@ module.exports = defineConfig({
 
     baseUrl: 'http://localhost:3000',
 
-    // Test file patterns
-    specPattern: ['cypress/e2e/login/**/*.cy.js', 'cypress/e2e/ui/**/*.cy.js']
+    // Test file patterns - simplified to catch all test files
+    specPattern: ['cypress/e2e/**/*.cy.js']
   },
 
   component: {

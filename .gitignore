@@ -4,3 +4,8 @@ node_modules/
 cypress/videos/
 cypress/screenshots/
 .env
+
+# Prevent Cypress files in root (use Automation Framework instead)
+cypress/
+cypress.config.js
+cypress.config.ts
