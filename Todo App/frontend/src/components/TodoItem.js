@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiEdit2, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiCheck } from 'react-icons/fi';
 import { format } from 'date-fns';
 
 const TodoItem = ({ todo, onToggle, onUpdate, onDelete }) => {

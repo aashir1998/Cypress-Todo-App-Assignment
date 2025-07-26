@@ -4,8 +4,7 @@ import {
   FiGithub,
   FiExternalLink,
   FiUser,
-  FiLogOut,
-  FiSettings
+  FiLogOut
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
