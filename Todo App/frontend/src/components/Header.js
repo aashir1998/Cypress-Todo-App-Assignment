@@ -1,11 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import {
-  FiGithub,
-  FiExternalLink,
-  FiUser,
-  FiLogOut
-} from 'react-icons/fi';
+import { FiGithub, FiExternalLink, FiUser, FiLogOut } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
 const Header = ({ user, onLogout }) => {
