@@ -1,109 +1,227 @@
-# Aashir-Mailer-Lite-Test-Assignment
+# Cypress Todo App Assignment
 
-# Cypress Automation Framework
+A full-stack Todo application with React frontend, Node.js backend, and comprehensive Cypress testing framework.
 
-## 1. Why I Chose This Tech Stack and Design Pattern
+## 🏗️ Project Structure
 
-I chose **Cypress** with the **Page Object Model (POM)** and Javascript because Cypress provides **seamless integration for email testing**, is **fast, reliable**, supports **automatic retries**, and has **dynamic timeouts** to handle flaky tests effectively.
+```
+├── Todo App/                    # Main application code
+│   ├── frontend/               # React frontend application
+│   └── backend/                # Node.js backend API
+├── Automation Framework/        # Complete testing framework
+│   ├── cypress/               # Cypress testing framework
+│   │   ├── e2e/              # End-to-end tests
+│   │   ├── fixtures/         # Test data and configurations
+│   │   ├── support/          # Custom commands and utilities
+│   │   └── reports/          # Test execution reports
+│   ├── cypress.config.js     # Cypress configuration
+│   ├── eslint.config.js      # ESLint configuration
+│   ├── .prettierrc          # Prettier configuration
+│   └── README.md            # Framework documentation
+├── package.json               # Root package.json with unified scripts
+└── README.md                  # This file
+```
 
-The **Page Object Model (POM)** ensures **code reusability, maintainability**, and a well-structured framework that enhances scalability and efficiency. This approach allows for a **robust and efficient test automation suite**.
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js >= 16.0.0
+- npm >= 8.0.0
+
+### Installation & Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/aashir1998/Cypress-Todo-App-Assignment.git
+   cd Cypress-Todo-App-Assignment
+   ```
+
+2. **Install all dependencies**
+   ```bash
+   npm install
+   cd "Todo App/backend" && npm install
+   cd "../frontend" && npm install
+   cd ../..
+   ```
+
+3. **Start the application**
+   ```bash
+   npm run dev
+   ```
+
+This single command will start both the frontend (port 3000) and backend (port 3001) servers concurrently.
+
+## 📱 Application Features
+
+### Frontend (React)
+- **Modern UI**: Built with React 18, Tailwind CSS, and Framer Motion
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
+- **Real-time Updates**: React Query for efficient data management
+- **User Authentication**: Simple demo login system
+- **Todo Management**: Create, edit, delete, and filter todos
+- **Search Functionality**: Real-time search across todos
+- **Bulk Operations**: Complete/uncomplete all todos
+- **Statistics Dashboard**: Visual representation of todo statistics
+
+### Backend (Node.js)
+- **RESTful API**: Express.js with comprehensive endpoints
+- **Security**: Helmet, CORS, rate limiting, and input validation
+- **Performance**: Compression and optimization middleware
+- **Error Handling**: Robust error handling and logging
+- **Data Persistence**: In-memory storage with UUID-based IDs
+
+## 🧪 Testing Framework
+
+The complete automation framework is located in the `Automation Framework/` directory and includes:
+
+### Cypress E2E Testing
+- **Comprehensive Coverage**: UI and login tests
+- **Stable Selectors**: Data automation IDs for reliable test execution
+- **Page Object Model**: Maintainable and reusable test structure
+- **Cross-browser Testing**: Chrome, Firefox, Edge support
+- **Mobile Testing**: Responsive design validation
+- **Parallel Execution**: CI/CD optimized test runs
+
+### Test Categories
+- **Login Tests**: Valid and invalid user authentication scenarios
+- **UI Tests**: Frontend component and user interaction testing
+- **Smoke Tests**: Critical functionality validation
+- **Regression Tests**: Comprehensive feature testing
+
+## 🛠️ Available Scripts
+
+### Application Commands
+```bash
+npm start                    # Start both frontend and backend
+npm run dev                  # Start both servers in development mode
+npm run start:backend        # Start only the backend server
+npm run start:frontend       # Start only the frontend server
+npm run build:frontend       # Build the frontend for production
+```
+
+### Testing Commands
+```bash
+npm run cy:open             # Open Cypress Test Runner
+npm run cy:run              # Run all Cypress tests
+npm run test:all            # Run all tests
+npm run test:headed         # Run tests with browser visible
+npm run test:chrome         # Run tests in Chrome
+npm run test:firefox        # Run tests in Firefox
+npm run test:edge           # Run tests in Edge
+npm run test:mobile         # Run tests in mobile viewport
+npm run test:tablet         # Run tests in tablet viewport
+npm run test:desktop        # Run tests in desktop viewport
+```
+
+### Specialized Test Commands
+```bash
+npm run e2e:smoke:tests     # Run smoke tests only
+npm run e2e:regression:tests # Run regression tests only
+npm run api:tests           # Run API tests only
+npm run ui:tests            # Run UI tests only
+npm run test:parallel       # Run tests in parallel (CI/CD)
+```
+
+### Development Commands
+```bash
+npm run setup               # Complete project setup
+npm run install:app         # Install app dependencies only
+npm run prettier-format     # Format code with Prettier
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+The application uses environment variables for configuration. Create a `.env` file in the root directory:
+
+```env
+# Backend Configuration
+PORT=3001
+NODE_ENV=development
+
+# Frontend Configuration
+REACT_APP_API_URL=http://localhost:3001/api
+
+# Cypress Configuration
+CYPRESS_TODO_API_URL=http://localhost:3001/api
+CYPRESS_TODO_APP_URL=http://localhost:3000
+```
+
+### Cypress Configuration
+The Cypress configuration is located in `cypress.config.js` and includes:
+- Custom viewport settings
+- Timeout configurations
+- Reporter settings
+- Environment variables
+- Test retry logic
+
+## 📊 Test Reports
+
+Cypress generates comprehensive test reports including:
+- **Mochawesome Reports**: HTML-based detailed reports
+- **Screenshots**: Failed test screenshots
+- **Videos**: Test execution recordings
+- **Console Logs**: Detailed execution logs
+
+Reports are generated in the `cypress/reports/` directory.
+
+## 🎯 Demo Credentials
+
+For testing the application:
+- **Email**: `demo@example.com`
+- **Password**: `password`
+
+## 🔍 Data Automation IDs
+
+The application includes comprehensive data automation IDs for stable test selectors:
+
+### Key Selectors
+- `data-automation-id="login-form"` - Login form
+- `data-automation-id="todo-input"` - Todo input field
+- `data-automation-id="add-todo-button"` - Add todo button
+- `data-automation-id="todo-list"` - Todo list container
+- `data-automation-id="search-input"` - Search input
+- `data-automation-id="filter-all"` - All filter button
+- `data-automation-id="github-link"` - GitHub profile link
+
+## 🚀 Deployment
+
+### Frontend Deployment
+```bash
+npm run build:frontend
+```
+The built files will be in `Todo App/frontend/build/`
+
+### Backend Deployment
+The backend can be deployed to any Node.js hosting platform (Heroku, Vercel, etc.)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
+
+## 📝 License
+
+This project is licensed under the ISC License.
+
+## 👨‍💻 Author
+
+**Aashir Ahmed**
+- GitHub: [@aashir1998](https://github.com/aashir1998)
+- Portfolio: [Personal Website](https://aashir1998.github.io)
+
+## 🙏 Acknowledgments
+
+- React team for the amazing framework
+- Cypress team for the excellent testing tool
+- Tailwind CSS for the utility-first CSS framework
+- Framer Motion for smooth animations
+- All contributors and testers
 
 ---
 
-## 2. Running in Multiple Environments
-
-To ensure this framework runs smoothly across multiple environments, I have made it **fully dynamic**.
-
-- All environment-specific configurations, including **credentials, database details, URLs, tokens, and domains**, are stored in the `.env` file.
-- This eliminates any environment dependencies—simply updating the `.env` file allows the framework to be executed on any environment without modifications.
-- By following **best practices**, the framework is **scalable, flexible, and easy to maintain**.
-
----
-
-## 3. Test Classification and Execution in Separate Suites
-
-To efficiently organize and execute test cases across different suites:
-
-- I have used **Cypress grep tags** (`@smoke`, `@regression`, etc.), allowing tests to be classified into different groups.
-- Test cases are stored in **separate test files**, ensuring **independent execution** without any test dependency.
-- Example of running specific test suites:
-  - **Smoke Tests** → `npm run e2e:smoke:tests`
-  - **Regression Tests** → `npm run e2e:regression:tests`
-
-This setup makes test execution **modular, efficient, and highly scalable**.
-
----
-
-## 4. CI/CD Integration
-
-For CI/CD integration, I plan to use **GitHub Actions or Jenkins** for automation.
-
-- **Dockerized Cypress images** will ensure smooth and isolated test execution.
-- **Cypress Dashboard** or **Github Actions** will enable **parallel test execution** across multiple machines.
-- **Kubernetes Pods** will provide **scalability**, ensuring efficient resource utilization.
-- **Test Reporting**:
-  - **AIO Test Reporter / Mochawesome or any other reporting tool ** will be used to **log test results and generate reports**.
-  - This will allow real-time monitoring of test execution in CI/CD pipelines.
-- **Dynamic execution in CI/CD**:
-  - The framework will run on **any environment** without manual intervention.
-  - It will be integrated into **pre-release and post-release workflows**, allowing any sorts of tests like Smoke, Regression, Sanity to run automatically before or after deployment.
-- **Shift-Left Testing**:
-  - By implementing **early-stage automation**, bugs will be detected **sooner in the development cycle**, leading to **faster and higher-quality releases**.
-
----
-
-## 5. Additional Notes on Implementation
-
-- **API-Driven Approach**:
-  - The framework leverages APIs for **setup, assertions, and validations**, making it **efficient and reliable**.
-- **Selectors Optimization**:
-  - Using **data-test-id selectors** ensures tests remain **stable and non-flaky**.
-- **Best Practices & Code Quality**:
-  - The framework follows **industry-standard best practices**, including:
-    - **ESLint** for code formatting and consistency.
-    - **Cypress plugins** such as:
-      - `mochawesome` → **For detailed HTML test reports**.
-      - `cypress-plugin-api` → **For API testing**.
-      - `cypress-grep` → **For filtering tests using tags**.
-      - `mailosaur` → **For email testing and validation**.
-- **Challenges & Workarounds**:
-  - Due to **restrictions in the production environment**, I couldn't log in via Cypress and run my test cases locally.
-  - However, the framework is designed to work seamlessly across environments with minor adjustments. There can be more improvements to this repo such as utilising web hooks for event triggers to make test cases run faster. Besides this the execution time can be increased in many other ways by utilising cy.intercept() functionality as well.
-
----
-
-### 🚀 **Final Thoughts**
-
-This Cypress automation framework follows **modern best practices**, ensuring **speed, scalability, and reliability**.  
-It supports **multi-environment execution**, integrates smoothly into **CI/CD**, and enhances **test execution efficiency** with **parallelization and reporting mechanisms**.  
-By leveraging **API-first testing, shift-left methodologies, and a dynamic configuration setup**, this framework ensures **high-quality releases with minimal effort**. ✅
-
----
-
-### 🚀 **Installation & Execution Guide**
-
-- 1- Install Node
-- 2- Run the following command in your terminal to clone the repo:
-- git clone https://github.com/aashir1998/Aashir-Mailer-Lite-Test-Assignment.git
-- cd Aashir-Mailer-Lite-Test-Assignment
-- 3- npm install
-- 4- Create a .env file in the project root and add the necessary environment variables.
-
-- **MAILER_LITE_API_URL=** This refers to the API endpoint mentioned in the documentation
-- **MAILER_LITE_EMAIL=** This refers to the verified user email
-- **MAILER_LITE_PASSWORD=** This refers to the verified user password
-- **CYPRESS_MAILOSAUR_API_KEY=** The API can be retrieved from the mailosaur's platform
-- **CYPRESS_MAILOSAUR_SERVER_ID =** The server id can be retrieved from the mailosaur's platform
-- **MAILER_LITE_BASE_URL=** This refers to the url of the environment under test
-- **MAILER_LITE_AUTH_TOKEN=** The auth token can be retrieved from the integration section in mailer lite's platform
-- **MAILER_LITE_EMAIL_DOMAIN=** This refers to the domain being used for emails
-
-- 5- **npx cypress open** to run in UI or **npx cypress run** to run all the tests
-- 6- To run tests with tags :
-
-- **Smoke Tests** → `npm run e2e:smoke:tests`
-- **Regression Tests** → `npm run e2e:regression:tests`
-
-- 7- If origin changes after login, use cy.origin
-
----
+**Happy Testing! 🎉**

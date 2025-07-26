@@ -1,7 +1,7 @@
 {
-  "name": "aashir-mailer-lite-test-assignment",
+  "name": "cypress-todo-app-assignment",
   "version": "1.0.0",
-  "description": "",
+  "description": "A full-stack Todo application with React frontend, Node.js backend, and comprehensive Cypress testing framework",
   "main": "index.js",
   "scripts": {
     "prettier-format": "prettier --config .prettierrc '**/*.js' --write",
@@ -17,23 +17,32 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aashir1998/Aashir-Mailer-Lite-Test-Assignment.git"
+    "url": "git+https://github.com/aashir1998/Cypress-Todo-App-Assignment.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "cypress",
+    "testing",
+    "automation",
+    "e2e",
+    "api",
+    "todo-app",
+    "react",
+    "nodejs",
+    "express"
+  ],
+  "author": "Aashir Ahmed",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/aashir1998/Aashir-Mailer-Lite-Test-Assignment/issues"
+    "url": "https://github.com/aashir1998/Cypress-Todo-App-Assignment/issues"
   },
-  "homepage": "https://github.com/aashir1998/Aashir-Mailer-Lite-Test-Assignment#readme",
+  "homepage": "https://github.com/aashir1998/Cypress-Todo-App-Assignment#readme",
   "devDependencies": {
     "@cypress/grep": "^4.1.0",
     "@eslint/js": "^9.20.0",
     "@faker-js/faker": "^9.5.0",
     "concurrently": "^9.2.0",
     "cypress": "^14.0.3",
-    "cypress-mailosaur": "^2.17.0",
     "cypress-mochawesome-reporter": "^3.8.2",
     "cypress-plugin-api": "^2.11.2",
     "cypress-recurse": "^1.35.3",
@@ -43,7 +52,6 @@
     "eslint-plugin-cypress": "^4.1.0",
     "globals": "^15.15.0",
     "import": "^0.0.6",
-    "mailosaur": "^8.8.1",
     "prettier": "3.5.1"
   }
 }
