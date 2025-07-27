@@ -14,7 +14,7 @@
     "install:backend": "cd 'Todo App/backend' && npm install",
     "start:backend": "cd 'Todo App/backend' && npm start",
     "start:frontend": "cd 'Todo App/frontend' && npm start",
-    "start": "sh -c \"npm run start:backend  && npm run start:frontend & wait\"",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "cy:verify": "cd 'Automation Framework' && cypress verify",
     "cy:run": "cd 'Automation Framework' && cypress run",
     "e2e:regression:tests": "cd 'Automation Framework' && cypress run --env grepTags=@Regression,grepFilterSpecs=true",

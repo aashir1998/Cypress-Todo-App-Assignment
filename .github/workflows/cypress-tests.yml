@@ -3,8 +3,7 @@ name: Cypress Regression Tests
 on:
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
+ 
 
 jobs:
   regression-tests:
@@ -12,68 +11,65 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      # 1. Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "18"
 
-      # 3. Cache root node_modules
+      # Cache dependencies
       - name: Cache root node_modules
         uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{ runner.os }}-root-${{ hashFiles('package-lock.json') }}
 
-      # 4. Cache frontend node_modules
       - name: Cache frontend node_modules
         uses: actions/cache@v3
         with:
           path: Todo App/frontend/node_modules
           key: ${{ runner.os }}-frontend-${{ hashFiles('Todo App/frontend/package-lock.json') }}
 
-      # 5. Cache backend node_modules
       - name: Cache backend node_modules
         uses: actions/cache@v3
         with:
           path: Todo App/backend/node_modules
           key: ${{ runner.os }}-backend-${{ hashFiles('Todo App/backend/package-lock.json') }}
 
-      # 6. Cache Cypress binary
       - name: Cache Cypress binary
         uses: actions/cache@v3
         with:
           path: ~/.cache/Cypress
           key: ${{ runner.os }}-cypress-${{ hashFiles('package-lock.json') }}
 
-      # 7. Install all dependencies (root + FE + BE)
       - name: Install all dependencies
         run: npm run install:all
 
-      # 8. Install Cypress binary (if missing)
       - name: Install Cypress binary
         run: npx cypress install
         working-directory: Automation Framework
 
-      # 9. Start backend and frontend servers
-      - name: Start server
-        run: npm run start &
+      # Start both FE and BE
+      - name: Start BE and FE Server
+        run: npm start &
+        env:
+          PORT: 3000
+          REACT_APP_API_URL: http://localhost:3001
+          NODE_ENV: development
+          BROWSER: none
+          CI: true
 
-      # 10. Wait for server to be ready
-      - name: Wait for server
-        run: sleep 45
-
-      # 11. Run Cypress regression tests (tagged @Regression)
+      
       - name: Run Cypress Regression Tests
         run: npm run e2e:regression:tests:ci
         env:
           CI: true
+          CYPRESS_BASE_URL: http://localhost:3000
+          CYPRESS_TODO_API_URL: http://localhost:3001
+          CYPRESS_TODO_APP_URL: http://localhost:3000
 
-      # 12. Upload Mochawesome HTML report
       - name: Upload HTML report
         uses: actions/upload-artifact@v4
         if: always()
@@ -81,7 +77,6 @@ jobs:
           name: Cypress HTML Report
           path: Automation Framework/cypress/reports/html
 
-      # 13. Upload screenshots ONLY on failure
       - name: Upload screenshots
         uses: actions/upload-artifact@v4
         if: failure()
@@ -89,7 +84,6 @@ jobs:
           name: Cypress Screenshots
           path: Automation Framework/cypress/screenshots
 
-      # 14. Upload videos ONLY on failure
       - name: Upload videos
         uses: actions/upload-artifact@v4
         if: failure()
