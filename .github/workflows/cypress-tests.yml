@@ -7,16 +7,6 @@ on:
     branches: [master, main]
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  NODE_ENV: test
-  CI: true
-  CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
-  HUSKY: 0
-
 jobs:
   regression-tests:
     name: 🧪 Cypress E2E Tests
@@ -24,13 +14,11 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      # Checkout repo
       - name: ⚡ Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      # Setup Node with caching
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -41,47 +29,21 @@ jobs:
             Todo App/frontend/package-lock.json
             Todo App/backend/package-lock.json
 
-      # Cache node_modules + Cypress
-      - name: 🗄️ Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            Todo App/frontend/node_modules
-            Todo App/backend/node_modules
-            ~/.cache/Cypress
-            ~/.npm
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-deps-
-
-      # Install all dependencies
-      - name: 📦 Install dependencies
+      - name: 📦 Install all dependencies
         run: npm run install:all
 
-      # Lint frontend (optional)
-      - name: 🔍 Run lint
-        run: npm run lint
+      - name: 🚀 Start Backend and Frontend
+        run: npm run start &
+      
+      - name: ⏳ Wait for services to start
+        run: sleep 10
 
-      # Build frontend (needed for Cypress to serve built app)
-      - name: 🏗️ Build frontend
-        run: npm run build
-
-      # Verify Cypress binary (ensures it's downloaded)
       - name: ✅ Verify Cypress
-        run: npx cypress verify
+        run: npx cypress verify --project 'Automation Framework'
 
-      # Run Cypress regression tests in headless mode
       - name: 🧪 Run Cypress Regression Tests
         run: npm run ci:e2e
-        env:
-          CYPRESS_VIDEO: false
-          CYPRESS_SCREENSHOTS: true
-          CYPRESS_CHROME_FLAGS: --no-sandbox --disable-dev-shm-usage --disable-gpu --disable-software-rasterizer
-          CYPRESS_BASE_URL: http://localhost:3000
-          CYPRESS_API_URL: http://localhost:3001
 
-      # Upload HTML report
       - name: 📊 Upload Cypress Report
         uses: actions/upload-artifact@v4
         if: always()
@@ -90,18 +52,6 @@ jobs:
           path: Automation Framework/cypress/reports/html
           retention-days: 7
 
-      # Upload screenshots/videos on failure
-      - name: 📸 Upload Failure Artifacts
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: cypress-failures-${{ github.run_number }}
-          path: |
-            Automation Framework/cypress/screenshots
-            Automation Framework/cypress/videos
-          retention-days: 3
-
-      # Cleanup processes
       - name: 🧹 Cleanup
         if: always()
         run: |
@@ -109,7 +59,6 @@ jobs:
           pkill -f "react-scripts" || true
           pkill -f "concurrently" || true
 
-      # Summary in GitHub UI
       - name: 📋 Test Results Summary
         if: always()
         run: |

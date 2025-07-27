@@ -16,12 +16,9 @@
   "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
   "start:backend": "cd 'Todo App/backend' && npm start",
   "start:frontend": "cd 'Todo App/frontend' && npm start",
-  "build": "cd 'Todo App/frontend' && npm run build",
-  "lint": "cd 'Todo App/frontend' && npm run lint",
-  "test:e2e": "npm run cy:run -- --env grepTags=@Regression,grepFilterSpecs=true",
-  "test:e2e:report": "npm run test:e2e && npx mochawesome-merge 'Automation Framework/cypress/reports/json/*.json' > 'Automation Framework/cypress/reports/mochawesome.json' && npx marge 'Automation Framework/cypress/reports/mochawesome.json' -f report -o 'Automation Framework/cypress/reports/html' && open 'Automation Framework/cypress/reports/html/index.html'",
-  "ci:e2e": "npm run start & sleep 30 && npm run cy:run -- --env grepTags=@Regression,grepFilterSpecs=true --browser chrome --headless --reporter cypress-mochawesome-reporter --reporter-options reportDir=cypress/reports,overwrite=false,html=true,json=true --config video=false,screenshotOnRunFailure=true"
-},
+  "ci:e2e": " npm run cy:run -- --env grepTags=@Regression,grepFilterSpecs=true --browser chrome --headless --reporter cypress-mochawesome-reporter --reporter-options reportDir=cypress/reports,overwrite=false,html=true,json=true --config video=false,screenshotOnRunFailure=true"
+}
+,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aashir1998/Cypress-Todo-App-Assignment.git"
