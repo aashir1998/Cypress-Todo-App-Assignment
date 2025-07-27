@@ -58,8 +58,29 @@ jobs:
           path: ~/.cache/Cypress
           key: ${{ runner.os }}-cypress-${{ hashFiles('package-lock.json') }}
 
-      - name: Install all dependencies
-        run: npm run install:all
+      - name: Clean workspace
+        run: |
+          rm -rf node_modules
+          rm -rf "Todo App/frontend/node_modules"
+          rm -rf "Todo App/backend/node_modules"
+          npm cache clean --force
+
+      - name: Install root dependencies
+        run: npm ci --prefer-offline --no-audit --no-optional
+        env:
+          NODE_ENV: development
+
+      - name: Install frontend dependencies
+        run: npm ci --prefer-offline --no-audit --no-optional
+        working-directory: Todo App/frontend
+        env:
+          NODE_ENV: development
+
+      - name: Install backend dependencies
+        run: npm ci --prefer-offline --no-audit --no-optional
+        working-directory: Todo App/backend
+        env:
+          NODE_ENV: development
 
       - name: Install Cypress binary
         run: npx cypress install
