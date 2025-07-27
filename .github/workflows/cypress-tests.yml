@@ -1,76 +1,84 @@
-name: 🚀 Cypress Regression Tests
+name: Cypress Regression Tests
 
 on:
   push:
-    branches: [master, main]
+    branches: [master]
   pull_request:
-    branches: [master, main]
-  workflow_dispatch:
+    branches: [master]
 
 jobs:
   regression-tests:
-    name: 🧪 Cypress E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
     steps:
-      - name: ⚡ Checkout code
+      # 1. Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
-      - name: ⚡ Setup Node.js
+      # 2. Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: |
-            package-lock.json
-            Todo App/frontend/package-lock.json
-            Todo App/backend/package-lock.json
 
-      - name: 📦 Install all dependencies
+      # 3. Cache dependencies (root + FE + BE)
+      - name: Cache root node_modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-root-${{ hashFiles('package-lock.json') }}
+
+      - name: Cache frontend node_modules
+        uses: actions/cache@v3
+        with:
+          path: Todo App/frontend/node_modules
+          key: ${{ runner.os }}-frontend-${{ hashFiles('Todo App/frontend/package-lock.json') }}
+
+      - name: Cache backend node_modules
+        uses: actions/cache@v3
+        with:
+          path: Todo App/backend/node_modules
+          key: ${{ runner.os }}-backend-${{ hashFiles('Todo App/backend/package-lock.json') }}
+
+      # 4. Install all dependencies (root + FE + BE)
+      - name: Install all dependencies
         run: npm run install:all
 
-      - name: 🚀 Start Backend and Frontend
+      # 5. Start full stack server (FE + BE concurrently)
+      - name: Start server
         run: npm run start &
-      
-      - name: ⏳ Wait for services to start
-        run: sleep 10
 
-      - name: ✅ Verify Cypress
-        run: npx cypress verify --project 'Automation Framework'
+      # 6. Wait for server to be ready
+      - name: Wait for server
+        run: sleep 45
 
-      - name: 🧪 Run Cypress Regression Tests
-        run: npm run ci:e2e
+      # 7. Run Cypress regression tests (tagged @Regression)
+      - name: Run Cypress Regression Tests
+        run: npm run e2e:regression:tests:ci
+        env:
+          CI: true
 
-      - name: 📊 Upload Cypress Report
+      # 8. Upload Mochawesome HTML report
+      - name: Upload HTML report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cypress-report-${{ github.run_number }}
+          name: Cypress HTML Report
           path: Automation Framework/cypress/reports/html
-          retention-days: 7
 
-      - name: 🧹 Cleanup
-        if: always()
-        run: |
-          pkill -f "node.*Todo App" || true
-          pkill -f "react-scripts" || true
-          pkill -f "concurrently" || true
+      # 9. Upload screenshots ONLY on failure
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Cypress Screenshots
+          path: Automation Framework/cypress/screenshots
 
-      - name: 📋 Test Results Summary
-        if: always()
-        run: |
-          echo "## 🧪 Cypress Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Node Version | 18 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Browser | Chrome (Headless) |" >> $GITHUB_STEP_SUMMARY
-          echo "| Timestamp | $(date -u) |" >> $GITHUB_STEP_SUMMARY
-          if [ -f "Automation Framework/cypress/reports/html/index.html" ]; then
-            echo "| Report Status | ✅ Generated |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Report Status | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "| Overall Status | ${{ job.status }} |" >> $GITHUB_STEP_SUMMARY
+      # 10. Upload videos ONLY on failure
+      - name: Upload videos
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Cypress Videos
+          path: Automation Framework/cypress/videos

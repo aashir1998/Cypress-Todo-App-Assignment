@@ -7,18 +7,24 @@
     "Todo App/frontend",
     "Todo App/backend"
   ],
-"scripts": {
-  "clean": "rm -rf node_modules 'Todo App/frontend/node_modules' 'Todo App/backend/node_modules' 'Automation Framework/node_modules'",
-  "install:all": "npm ci --prefer-offline --no-audit && cd 'Todo App/frontend' && npm ci --prefer-offline --no-audit && cd ../backend && npm ci --prefer-offline --no-audit",
-  "cy:open": "cypress open --project 'Automation Framework'",
-  "cy:run": "cypress run --project 'Automation Framework'",
-  "cy:verify": "cypress verify --project 'Automation Framework'",
-  "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
-  "start:backend": "cd 'Todo App/backend' && npm start",
-  "start:frontend": "cd 'Todo App/frontend' && npm start",
-  "ci:e2e": " npm run cy:run -- --env grepTags=@Regression,grepFilterSpecs=true --browser chrome --headless --reporter cypress-mochawesome-reporter --reporter-options reportDir=cypress/reports,overwrite=false,html=true,json=true --config video=false,screenshotOnRunFailure=true"
-}
-,
+  "scripts": {
+    "cy:verify": "cd \"Automation Framework\" && cypress verify",
+    "cy:run": "cd \"Automation Framework\" && cypress run",
+    "cy:open": "cd \"Automation Framework\" && cypress open",
+    "e2e:smoke:tests": "cd \"Automation Framework\" && cypress run --env grepTags=@Smoke,grepFilterSpecs=true",
+    "e2e:regression:tests": "cd \"Automation Framework\" && cypress run --env grepTags=@Regression,grepFilterSpecs=true",
+    "e2e:regression:tests:ci": "cd \"Automation Framework\" && cypress run --env grepTags=@Regression,grepFilterSpecs=true",
+    "test:all": "cd \"Automation Framework\" && cypress run",
+    "start:backend": "cd \"Todo App/backend\" && npm start",
+    "start:frontend": "cd \"Todo App/frontend\" && npm start",
+    "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start": "npm run dev",
+    "install:all": "npm install && npm run install:backend && npm run install:frontend",
+    "install:backend": "cd \"Todo App/backend\" && npm install",
+    "install:frontend": "cd \"Todo App/frontend\" && npm install",
+    "ci:regression": "npm run install:all && npm run start & sleep 45 && npm run e2e:regression:tests:ci",
+    "generate:report:local": "npm run e2e:regression:tests && echo '✅ Report generated at: Automation Framework/cypress/reports/html/index.html' && open 'Automation Framework/cypress/reports/html/index.html'"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aashir1998/Cypress-Todo-App-Assignment.git"
