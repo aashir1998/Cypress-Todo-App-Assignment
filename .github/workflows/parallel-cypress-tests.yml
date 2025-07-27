@@ -57,6 +57,18 @@ jobs:
           rm -rf /home/runner/.npm/_cacache
           rm -rf /home/runner/.npm/_logs
 
+      # Regenerate package-lock.json files completely
+      - name: Regenerate package-lock.json files
+        run: |
+          rm -f package-lock.json
+          rm -f "Todo App/frontend/package-lock.json"
+          rm -f "Todo App/backend/package-lock.json"
+          npm install --package-lock-only
+          cd "Todo App/frontend" && npm install --package-lock-only
+          cd "../backend" && npm install --package-lock-only
+        env:
+          NODE_ENV: development
+
       # Install dependencies with better error handling
       - name: Install dependencies
         run: |
