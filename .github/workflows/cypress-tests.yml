@@ -8,116 +8,102 @@ on:
 
 jobs:
   regression-tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
-      # ----------------------
-      # Step 1: Checkout Code
-      # ----------------------
-      - name: Checkout repository
+      # 1. Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # ----------------------
-      # Step 2: Setup Node.js
-      # ----------------------
+      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
 
-      # ----------------------
-      # Step 3: Cache Dependencies
-      # ----------------------
+      # 3. Cache dependencies (root + FE + BE + Cypress)
       - name: Cache root node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
-          path: node_modules
-          key: root-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          path: |
+            node_modules
+          key: ${{ runner.os }}-root-${{ hashFiles('package-lock.json') }}
+
+      - name: Cache frontend node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            Todo App/frontend/node_modules
+          key: ${{ runner.os }}-frontend-${{ hashFiles('Todo App/frontend/package-lock.json') }}
+
+      - name: Cache backend node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            Todo App/backend/node_modules
+          key: ${{ runner.os }}-backend-${{ hashFiles('Todo App/backend/package-lock.json') }}
 
       - name: Cache Automation Framework node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
-          path: Automation Framework/node_modules
-          key: af-${{ runner.os }}-${{ hashFiles('Automation Framework/package-lock.json') }}
+          path: |
+            Automation Framework/node_modules
+          key: ${{ runner.os }}-automation-${{ hashFiles('Automation Framework/package-lock.json') }}
 
-      - name: Cache Backend node_modules
-        uses: actions/cache@v4
-        with:
-          path: Todo App/backend/node_modules
-          key: backend-${{ runner.os }}-${{ hashFiles('Todo App/backend/package-lock.json') }}
-
-      - name: Cache Frontend node_modules
-        uses: actions/cache@v4
-        with:
-          path: Todo App/frontend/node_modules
-          key: frontend-${{ runner.os }}-${{ hashFiles('Todo App/frontend/package-lock.json') }}
-
-      # ----------------------
-      # Step 4: Install Dependencies
-      # ----------------------
-      - name: Install all dependencies (root + backend + frontend + Cypress)
+      # 4. Install all dependencies (including Automation Framework)
+      - name: Install all dependencies
         run: npm run install:all
 
-      # ----------------------
-      # Step 5: Start Application (FE + BE)
-      # ----------------------
-      - name: Start backend and frontend
-        run: |
-          npm run start &
-      
-      # ----------------------
-      # Step 6: Healthcheck (Wait until FE & BE are ready)
-      # ----------------------
-      - name: Wait for services to be ready
-        run: |
-          for i in {1..30}; do
-            if curl -s http://localhost:3000 >/dev/null && curl -s http://localhost:5000 >/dev/null; then
-              echo "Frontend & Backend are running"
-              break
-            fi
-            echo "Waiting for services..."
-            sleep 2
-          done
+      - name: Install Automation Framework dependencies
+        run: cd "Automation Framework" && npm install
 
-      # ----------------------
-      # Step 7: Run Regression Tests with @Regression Tag
-      # ----------------------
+      - name: Install backend dependencies
+        run: cd "Todo App/backend" && npm install
+
+      - name: Install frontend dependencies
+        run: cd "Todo App/frontend" && npm install
+
+      # 5. Install wait-on for server readiness check
+      - name: Install wait-on
+        run: npm install -g wait-on
+
+      # 6. Start full stack server (FE + BE)
+      - name: Start server
+        run: npm run start &
+
+      # 7. Wait for server to be ready at http://localhost:3000/login
+      - name: Wait for server to be ready
+        run: |
+          echo "Waiting for http://localhost:3000/login ..."
+          wait-on http-get://localhost:3000/login --timeout 60000
+
+      # 8. Run Cypress regression tests (tagged @Regression)
       - name: Run Cypress Regression Tests
-        working-directory: Automation Framework
         run: npm run e2e:regression:tests:ci
         env:
           CI: true
 
-      # ----------------------
-      # Step 8: Upload Cypress Reports (HTML)
-      # ----------------------
-      - name: Upload Cypress HTML Report
+      # 9. Upload Mochawesome HTML report
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
-          name: Cypress Regression HTML Report
+          name: Cypress HTML Report
           path: Automation Framework/cypress/reports/html
-          retention-days: 30
 
-      # ----------------------
-      # Step 9: Upload Screenshots (on failure)
-      # ----------------------
-      - name: Upload Screenshots
-        if: failure()
+      # 10. Upload screenshots ONLY on failure
+      - name: Upload screenshots
         uses: actions/upload-artifact@v4
+        if: failure()
         with:
           name: Cypress Screenshots
           path: Automation Framework/cypress/screenshots
-          retention-days: 30
 
-      # ----------------------
-      # Step 10: Upload Videos
-      # ----------------------
-      - name: Upload Cypress Videos
-        if: always()
+      # 11. Upload videos ONLY on failure
+      - name: Upload videos
         uses: actions/upload-artifact@v4
+        if: failure()
         with:
           name: Cypress Videos
           path: Automation Framework/cypress/videos
-          retention-days: 30
