@@ -13,7 +13,7 @@
     "cy:open": "cd \"Automation Framework\" && cypress open",
     "e2e:smoke:tests": "cd \"Automation Framework\" && cypress run --env grepTags=@Smoke,grepFilterSpecs=true",
     "e2e:regression:tests": "cd \"Automation Framework\" && cypress run --env grepTags=@Regression,grepFilterSpecs=true",
-    "e2e:regression:tests:ci": "cd \"Automation Framework\" && cypress run --env grepTags=@Regression,grepFilterSpecs=true",
+    "e2e:regression:tests:ci": "cd \"Automation Framework\" && cypress run --env grepTags=@Regression,grepFilterSpecs=true --browser chrome --headless --config video=false,screenshotOnRunFailure=true --reporter cypress-mochawesome-reporter --reporter-options reportDir=cypress/reports,overwrite=false,html=true,json=true",
     "test:all": "cd \"Automation Framework\" && cypress run",
     "start:backend": "cd \"Todo App/backend\" && npm start",
     "start:frontend": "cd \"Todo App/frontend\" && npm start",
@@ -22,7 +22,11 @@
     "install:all": "npm install && npm run install:backend && npm run install:frontend",
     "install:backend": "cd \"Todo App/backend\" && npm install",
     "install:frontend": "cd \"Todo App/frontend\" && npm install",
-    "ci:regression": "npm run install:all && npm run start & sleep 45 && npm run e2e:regression:tests:ci",
+    "install:ci": "npm ci --silent --prefer-offline && cd \"Todo App/backend\" && npm ci --silent --prefer-offline && cd \"../frontend\" && npm ci --silent --prefer-offline",
+    "health:check": "curl -f -s http://localhost:3001/health && curl -f -s http://localhost:3000",
+    "wait:services": "timeout 60 bash -c 'until npm run health:check; do echo \"⏳ Waiting for services...\"; sleep 2; done' && echo \"✅ All services ready!\"",
+    "start:ci": "npm run start &",
+    "ci:regression": "npm run install:ci && npm run start:ci && npm run wait:services && npm run e2e:regression:tests:ci",
     "generate:report:local": "npm run e2e:regression:tests && echo '✅ Report generated at: Automation Framework/cypress/reports/html/index.html' && open 'Automation Framework/cypress/reports/html/index.html'"
   },
   "repository": {
