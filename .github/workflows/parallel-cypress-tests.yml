@@ -74,7 +74,7 @@ jobs:
         run: |
           cd "Todo App/frontend"
           # Update proxy to match backend port
-          sed -i 's/"proxy": "http:\/\/localhost:3001"/"proxy": "${{ env.BACKEND_URL }}"/' package.json
+          sed -i 's|"proxy": "http://localhost:3001"|"proxy": "${{ env.BACKEND_URL }}"|' package.json
           PORT=${{ env.FRONTEND_PORT }} REACT_APP_API_URL=${{ env.BACKEND_URL }}/api BROWSER=none npm start &
           echo "Frontend server starting on port ${{ env.FRONTEND_PORT }}..."
           timeout 60 bash -c 'until curl -f ${{ env.FRONTEND_URL }}; do sleep 2; done'
