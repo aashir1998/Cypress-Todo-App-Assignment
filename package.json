@@ -8,17 +8,36 @@
     "Todo App/backend"
   ],
   "scripts": {
-  "cy:open": "cypress open --project 'Automation Framework'",
-  "cy:run": "cypress run --project 'Automation Framework'",
-  "cy:verify": "cypress verify --project 'Automation Framework'",
-  "install:all": "npm ci --prefer-offline --no-audit && cd 'Todo App/frontend' && npm ci --prefer-offline --no-audit && cd ../backend && npm ci --prefer-offline --no-audit",
-
-  "test:regression": "npm run cy:run -- --env grepTags=@Regression,grepFilterSpecs=true",
-
-  "test:regression:report": "npm run test:regression && npx mochawesome-merge 'Automation Framework/cypress/reports/json/*.json' > 'Automation Framework/cypress/reports/mochawesome.json' && npx marge 'Automation Framework/cypress/reports/mochawesome.json' -f report -o 'Automation Framework/cypress/reports/html' && open 'Automation Framework/cypress/reports/html/index.html'",
-
-  "ci:regression": "npm run install:all && npm run start & sleep 30 && npm run cy:run -- --env grepTags=@Regression,grepFilterSpecs=true --browser chrome --headless --config video=false,screenshotOnRunFailure=true --reporter cypress-mochawesome-reporter --reporter-options reportDir=cypress/reports,overwrite=false,html=true,json=true"
-},
+    "clean": "rm -rf node_modules && rm -rf 'Todo App/frontend/node_modules' && rm -rf 'Todo App/backend/node_modules' && rm -rf 'Automation Framework/node_modules'",
+    "clean:install": "npm run clean && npm run install:all",
+    
+    "install:all": "npm ci --prefer-offline --no-audit && cd 'Todo App/frontend' && npm ci --prefer-offline --no-audit && cd ../backend && npm ci --prefer-offline --no-audit",
+    "install:frontend": "cd 'Todo App/frontend' && npm ci --prefer-offline --no-audit",
+    "install:backend": "cd 'Todo App/backend' && npm ci --prefer-offline --no-audit",
+    
+    "cy:open": "cypress open --project 'Automation Framework'",
+    "cy:run": "cypress run --project 'Automation Framework'",
+    "cy:verify": "cypress verify --project 'Automation Framework'",
+    
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd 'Todo App/backend' && npm start",
+    "start:frontend": "cd 'Todo App/frontend' && npm start",
+    
+    "build": "npm run build:frontend",
+    "build:frontend": "cd 'Todo App/frontend' && npm run build",
+    
+    "test": "npm run test:backend && npm run test:e2e",
+    "test:backend": "cd 'Todo App/backend' && npm test",
+    "test:e2e": "npm run cy:run -- --env grepTags=@Regression,grepFilterSpecs=true",
+    "test:e2e:report": "npm run test:e2e && npx mochawesome-merge 'Automation Framework/cypress/reports/json/*.json' > 'Automation Framework/cypress/reports/mochawesome.json' && npx marge 'Automation Framework/cypress/reports/mochawesome.json' -f report -o 'Automation Framework/cypress/reports/html' && open 'Automation Framework/cypress/reports/html/index.html'",
+    
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd 'Todo App/frontend' && npm run lint",
+    "lint:backend": "cd 'Todo App/backend' && npm run lint || true",
+    
+    "ci": "npm run install:all && npm run lint && npm run build && npm run test:backend",
+    "ci:e2e": "npm run start & sleep 30 && npm run cy:run -- --env grepTags=@Regression,grepFilterSpecs=true --browser chrome --headless --config video=false,screenshotOnRunFailure=true --reporter cypress-mochawesome-reporter --reporter-options reportDir=cypress/reports,overwrite=false,html=true,json=true"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aashir1998/Cypress-Todo-App-Assignment.git"
