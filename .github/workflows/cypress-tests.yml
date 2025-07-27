@@ -1,40 +1,39 @@
-name: 🚀 Cypress E2E Tests
+name: 🚀 Cypress Regression Tests
 
 on:
   push:
     branches: [master]
   pull_request:
     branches: [master]
-  workflow_dispatch: # Allow manual triggering
+  workflow_dispatch:
 
-# Optimize concurrency - cancel previous runs on new pushes
+# Cancel previous runs on the same branch
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  # Global environment variables for optimization
   NODE_ENV: test
   CI: true
   CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
-  # Disable unnecessary features for speed
   HUSKY: 0
   CYPRESS_RECORD_KEY: false
 
 jobs:
-  # Single job for E2E tests (simplified)
-  e2e-tests:
+  regression-tests:
     name: 🧪 Cypress E2E Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
 
     steps:
+      # Checkout repository
       - name: ⚡ Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: ⚡ Setup Node.js with caching
+      # Setup Node.js with caching
+      - name: ⚡ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
@@ -44,8 +43,8 @@ jobs:
             Todo App/frontend/package-lock.json
             Todo App/backend/package-lock.json
 
-      # Unified caching strategy
-      - name: 🗄️ Cache dependencies & Cypress
+      # Cache Cypress + node_modules
+      - name: 🗄️ Cache dependencies
         uses: actions/cache@v4
         with:
           path: |
@@ -54,44 +53,61 @@ jobs:
             Todo App/backend/node_modules
             ~/.cache/Cypress
             ~/.npm
-          key: ${{ runner.os }}-all-deps-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-all-deps-
+            ${{ runner.os }}-deps-
 
-      # Single command to install, start, wait, and test
-      - name: 🚀 Run complete CI pipeline
-        run: npm run ci:regression
-       
+      # Install dependencies
+      - name: 📦 Install dependencies
+        run: npm run install:ci
 
-      # Kill any remaining processes
+      # Start services & wait
+      - name: 🚀 Start services & wait
+        run: npm run ci:start-and-wait
+
+      # Run Cypress regression tests
+      - name: 🧪 Run Cypress Regression Tests
+        run: npm run ci:test
+        env:
+          CYPRESS_VIDEO: false
+          CYPRESS_SCREENSHOTS: true
+          CYPRESS_CHROME_FLAGS: --no-sandbox --disable-dev-shm-usage
+
+      # Merge Mochawesome JSON into single HTML report
+      - name: 🧩 Merge Cypress Reports
+        if: always()
+        run: npm run report:merge
+
+      # Upload combined report (always)
+      - name: 📊 Upload Cypress Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-report-${{ github.run_number }}
+          path: Automation Framework/cypress/reports/html
+          retention-days: 7
+          compression-level: 6
+
+      # Upload failure artifacts (screenshots/videos only on failure)
+      - name: 📸 Upload Failure Artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-failures-${{ github.run_number }}
+          path: |
+            Automation Framework/cypress/screenshots
+            Automation Framework/cypress/videos
+          retention-days: 3
+          compression-level: 9
+
+      # Cleanup processes (avoid port conflicts)
       - name: 🧹 Cleanup processes
         if: always()
         run: |
           pkill -f "node.*Todo App" || true
           pkill -f "react-scripts" || true
 
-      # Streamlined artifact uploads
-      - name: 📊 Upload test reports
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: cypress-reports-${{ github.run_number }}
-          path: Automation Framework/cypress/reports/
-          retention-days: 7
-          compression-level: 6
-
-      - name: 📸 Upload failure artifacts
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: cypress-failures-${{ github.run_number }}
-          path: |
-            Automation Framework/cypress/screenshots/
-            Automation Framework/cypress/videos/
-          retention-days: 3
-          compression-level: 9
-
-      # Test results summary
+      # Add summary to GitHub UI
       - name: 📋 Test Results Summary
         if: always()
         run: |
@@ -109,7 +125,6 @@ jobs:
             echo "| Report Status | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
           fi
 
-          # Add job status
           if [ "${{ job.status }}" = "success" ]; then
             echo "| Overall Status | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
           else
