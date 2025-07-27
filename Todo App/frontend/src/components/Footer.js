@@ -14,7 +14,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="text-center md:text-left mb-4 md:mb-0">
             <p className="text-gray-600 text-sm">
-              © 2024 Aashir's Todo App. Built with React and Node.js
+              © 2025 Aashir's Todo App. Built with React and Node.js
             </p>
           </div>
 
