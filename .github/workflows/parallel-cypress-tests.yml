@@ -14,13 +14,12 @@ env:
   FRONTEND_URL: "http://localhost:3000"
 
 jobs:
-  # Setup and start servers
-  setup-servers:
+  # Setup environment and prepare dependencies
+  setup-environment:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     outputs:
-      backend-port: ${{ steps.setup-backend.outputs.port }}
-      frontend-port: ${{ steps.setup-frontend.outputs.port }}
+      ready: ${{ steps.verify-setup.outputs.ready }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -54,48 +53,15 @@ jobs:
         env:
           NODE_ENV: development
 
-      # Start backend server
-      - name: Start backend server
-        id: setup-backend
+      - name: Verify setup
+        id: verify-setup
         run: |
-          cd "Todo App/backend"
-          PORT=${{ env.BACKEND_PORT }} npm start &
-          echo "Backend server starting on port ${{ env.BACKEND_PORT }}..."
-          timeout 60 bash -c 'until curl -f ${{ env.BACKEND_URL }}/health; do sleep 2; done'
-          echo "Backend server is ready!"
-          echo "port=${{ env.BACKEND_PORT }}" >> $GITHUB_OUTPUT
-        env:
-          NODE_ENV: development
-          CI: true
+          echo "Environment setup completed successfully!"
+          echo "ready=true" >> $GITHUB_OUTPUT
 
-      # Start frontend server
-      - name: Start frontend server
-        id: setup-frontend
-        run: |
-          cd "Todo App/frontend"
-          # Update proxy to match backend port
-          sed -i 's|"proxy": "http://localhost:3001"|"proxy": "${{ env.BACKEND_URL }}"|' package.json
-          PORT=${{ env.FRONTEND_PORT }} REACT_APP_API_URL=${{ env.BACKEND_URL }}/api BROWSER=none npm start &
-          echo "Frontend server starting on port ${{ env.FRONTEND_PORT }}..."
-          timeout 60 bash -c 'until curl -f ${{ env.FRONTEND_URL }}; do sleep 2; done'
-          echo "Frontend server is ready!"
-          echo "port=${{ env.FRONTEND_PORT }}" >> $GITHUB_OUTPUT
-        env:
-          REACT_APP_API_URL: ${{ env.BACKEND_URL }}
-          NODE_ENV: development
-          CI: true
-
-      # Verify servers are running
-      - name: Verify servers are running
-        run: |
-          echo "Verifying servers..."
-          curl -f ${{ env.BACKEND_URL }}/health || exit 1
-          curl -f ${{ env.FRONTEND_URL }} || exit 1
-          echo "All servers are running successfully!"
-
-  # API Tests - Run first after servers are ready
+  # API Tests - Run first after environment setup
   api-tests:
-    needs: setup-servers
+    needs: setup-environment
     runs-on: ubuntu-latest
     timeout-minutes: 8
     outputs:
@@ -116,6 +82,18 @@ jobs:
           npm run cy:verify
         env:
           NODE_ENV: development
+
+      # Start backend server for API tests
+      - name: Start backend server
+        run: |
+          cd "Todo App/backend"
+          PORT=${{ env.BACKEND_PORT }} npm start &
+          echo "Backend server starting on port ${{ env.BACKEND_PORT }}..."
+          timeout 60 bash -c 'until curl -f ${{ env.BACKEND_URL }}/health; do sleep 2; done'
+          echo "Backend server is ready!"
+        env:
+          NODE_ENV: development
+          CI: true
 
       - name: Run API Tests
         id: run-tests
@@ -174,6 +152,33 @@ jobs:
         env:
           NODE_ENV: development
 
+      # Start backend server for smoke tests
+      - name: Start backend server
+        run: |
+          cd "Todo App/backend"
+          PORT=${{ env.BACKEND_PORT }} npm start &
+          echo "Backend server starting on port ${{ env.BACKEND_PORT }}..."
+          timeout 60 bash -c 'until curl -f ${{ env.BACKEND_URL }}/health; do sleep 2; done'
+          echo "Backend server is ready!"
+        env:
+          NODE_ENV: development
+          CI: true
+
+      # Start frontend server for smoke tests
+      - name: Start frontend server
+        run: |
+          cd "Todo App/frontend"
+          # Update proxy to match backend port
+          sed -i 's|"proxy": "http://localhost:3001"|"proxy": "${{ env.BACKEND_URL }}"|' package.json
+          PORT=${{ env.FRONTEND_PORT }} REACT_APP_API_URL=${{ env.BACKEND_URL }}/api BROWSER=none npm start &
+          echo "Frontend server starting on port ${{ env.FRONTEND_PORT }}..."
+          timeout 60 bash -c 'until curl -f ${{ env.FRONTEND_URL }}; do sleep 2; done'
+          echo "Frontend server is ready!"
+        env:
+          REACT_APP_API_URL: ${{ env.BACKEND_URL }}
+          NODE_ENV: development
+          CI: true
+
       - name: Run Smoke Tests
         id: run-tests
         run: |
@@ -230,6 +235,33 @@ jobs:
           npm run cy:verify
         env:
           NODE_ENV: development
+
+      # Start backend server for regression tests
+      - name: Start backend server
+        run: |
+          cd "Todo App/backend"
+          PORT=${{ env.BACKEND_PORT }} npm start &
+          echo "Backend server starting on port ${{ env.BACKEND_PORT }}..."
+          timeout 60 bash -c 'until curl -f ${{ env.BACKEND_URL }}/health; do sleep 2; done'
+          echo "Backend server is ready!"
+        env:
+          NODE_ENV: development
+          CI: true
+
+      # Start frontend server for regression tests
+      - name: Start frontend server
+        run: |
+          cd "Todo App/frontend"
+          # Update proxy to match backend port
+          sed -i 's|"proxy": "http://localhost:3001"|"proxy": "${{ env.BACKEND_URL }}"|' package.json
+          PORT=${{ env.FRONTEND_PORT }} REACT_APP_API_URL=${{ env.BACKEND_URL }}/api BROWSER=none npm start &
+          echo "Frontend server starting on port ${{ env.FRONTEND_PORT }}..."
+          timeout 60 bash -c 'until curl -f ${{ env.FRONTEND_URL }}; do sleep 2; done'
+          echo "Frontend server is ready!"
+        env:
+          REACT_APP_API_URL: ${{ env.BACKEND_URL }}
+          NODE_ENV: development
+          CI: true
 
       - name: Run Regression Tests
         id: run-tests
@@ -316,7 +348,7 @@ jobs:
           - Regression Tests: ${{ needs.regression-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }}
           
           ## Execution Order
-          1. Setup servers (Backend: ${{ env.BACKEND_PORT }}, Frontend: ${{ env.FRONTEND_PORT }})
+          1. Setup environment
           2. API Tests (Backend validation)
           3. Smoke Tests (Core functionality)
           4. Regression Tests (Full feature set)
