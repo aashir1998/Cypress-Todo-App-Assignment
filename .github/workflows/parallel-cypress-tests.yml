@@ -6,10 +6,16 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  NODE_VERSION: "18"
+  CYPRESS_BASE_URL: http://localhost:3000
+  CYPRESS_TODO_API_URL: http://localhost:3001
+  CYPRESS_TODO_APP_URL: http://localhost:3000
+
 jobs:
   cypress-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
@@ -17,11 +23,9 @@ jobs:
         include:
           - test-suite: smoke
             tag: '@Smoke'
-            timeout: 15
             description: 'Smoke Tests'
           - test-suite: regression
             tag: '@Regression'
-            timeout: 20
             description: 'Regression Tests'
 
     steps:
@@ -31,63 +35,35 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
       # Cache dependencies
-      - name: Cache root node_modules
+      - name: Cache dependencies
         uses: actions/cache@v3
         with:
-          path: node_modules
-          key: ${{ runner.os }}-root-${{ hashFiles('package-lock.json') }}
+          path: |
+            node_modules
+            Todo App/frontend/node_modules
+            Todo App/backend/node_modules
+            ~/.cache/Cypress
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-
 
-      - name: Cache frontend node_modules
-        uses: actions/cache@v3
-        with:
-          path: Todo App/frontend/node_modules
-          key: ${{ runner.os }}-frontend-${{ hashFiles('Todo App/frontend/package-lock.json') }}
-
-      - name: Cache backend node_modules
-        uses: actions/cache@v3
-        with:
-          path: Todo App/backend/node_modules
-          key: ${{ runner.os }}-backend-${{ hashFiles('Todo App/backend/package-lock.json') }}
-
-      - name: Cache Cypress binary
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/Cypress
-          key: ${{ runner.os }}-cypress-${{ hashFiles('package-lock.json') }}
-
-      - name: Clean workspace
-        run: |
-          rm -rf node_modules
-          rm -rf "Todo App/frontend/node_modules"
-          rm -rf "Todo App/backend/node_modules"
-          npm cache clean --force
-
-      - name: Install root dependencies
-        run: npm ci --prefer-offline --no-audit --no-optional
+      # Install dependencies
+      - name: Install dependencies
+        run: npm run install:all
         env:
           NODE_ENV: development
 
-      - name: Install frontend dependencies
-        run: npm ci --prefer-offline --no-audit --no-optional
-        working-directory: Todo App/frontend
+      - name: Install Cypress
+        run: npm run cy:verify
         env:
           NODE_ENV: development
 
-      - name: Install backend dependencies
-        run: npm ci --prefer-offline --no-audit --no-optional
-        working-directory: Todo App/backend
-        env:
-          NODE_ENV: development
-
-      - name: Install Cypress binary
-        run: npx cypress install
-        working-directory: Automation Framework
-
-      # Start both FE and BE (Backend: 3001, Frontend: 3000)
-      - name: Start BE and FE Server
+      # Start application servers
+      - name: Start application servers
         run: npm start &
         env:
           REACT_APP_API_URL: http://localhost:3001
@@ -95,54 +71,34 @@ jobs:
           BROWSER: none
           CI: true
 
-      # Wait for servers to be ready
-      - name: Wait for servers
-        run: |
-          echo "Giving servers time to start up..."
-          sleep 15
-          
-          echo "Waiting for backend server on port 3001..."
-          timeout 60 bash -c 'until curl -s http://localhost:3001/health > /dev/null; do sleep 2; done'
-          echo "Backend server is ready!"
-          
-          echo "Waiting for frontend server on port 3000..."
-          timeout 60 bash -c 'until curl -s http://localhost:3000 > /dev/null; do sleep 2; done'
-          echo "Frontend server is ready!"
-          
-          echo "Both servers are ready for testing!"
 
-      # Run Cypress tests using matrix strategy
-      - name: Cypress ${{ matrix.description }}
+      # Run Cypress tests
+      - name: Run ${{ matrix.description }}
         uses: cypress-io/github-action@v6
         with:
           working-directory: .
-          command: cd 'Automation Framework' && npx cypress run --env grepTags=${{ matrix.tag }},grepFilterSpecs=true
+          command: npm run e2e:${{ matrix.test-suite }}:tests:ci
         env:
           CI: true
-          CYPRESS_BASE_URL: http://localhost:3000
-          CYPRESS_TODO_API_URL: http://localhost:3001
-          CYPRESS_TODO_APP_URL: http://localhost:3000
 
-      # Upload Test Report
-      - name: Upload ${{ matrix.description }} Report
+      # Upload artifacts
+      - name: Upload test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Cypress ${{ matrix.description }} Report
+          name: ${{ matrix.description }} Report
           path: Automation Framework/cypress/reports/html
 
-      # Upload screenshots on failure
-      - name: Upload ${{ matrix.description }} Screenshots
+      - name: Upload screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: Cypress ${{ matrix.description }} Screenshots
+          name: ${{ matrix.description }} Screenshots
           path: Automation Framework/cypress/screenshots
 
-      # Upload videos on failure
-      - name: Upload ${{ matrix.description }} Videos
+      - name: Upload videos
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: Cypress ${{ matrix.description }} Videos
+          name: ${{ matrix.description }} Videos
           path: Automation Framework/cypress/videos 
