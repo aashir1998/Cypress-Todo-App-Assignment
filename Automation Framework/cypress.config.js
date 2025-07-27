@@ -14,25 +14,10 @@ module.exports = defineConfig({
   numTestsKeptInMemory: 3,
 
   env: {
-    // Our Todo App API
-    todoApiUrl: 'http://localhost:3001/api',
-
-    // Our Todo App Frontend
-    todoAppUrl: 'http://localhost:3000',
-
-    // Test data
-    testUser: {
-      username: 'testuser',
-      email: 'demo@example.com',
-      password: 'password'
-    },
-
-    // Reporting and filtering
+    todoApiUrl: process.env.CYPRESS_TODO_API_URL,
+    todoAppUrl: process.env.CYPRESS_TODO_APP_URL,
     grepFilterSpecs: true,
     grepOmitFiltered: true,
-
-    // Performance testing
-    performanceThreshold: 3000
   },
 
   e2e: {
@@ -49,7 +34,7 @@ module.exports = defineConfig({
       openMode: 0
     },
 
-    baseUrl: 'http://localhost:3000',
+    baseUrl: process.env.CYPRESS_BASE_URL || 'http://localhost:3000',
 
     // Test file patterns - simplified to catch all test files
     specPattern: ['cypress/e2e/**/*.cy.js']

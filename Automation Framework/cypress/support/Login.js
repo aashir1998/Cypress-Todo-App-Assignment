@@ -2,75 +2,59 @@
 
 class Login {
   constructor() {
-    // Locators for Todo App Login
     this.emailInput = '[data-automation-id="email-input"]';
     this.passwordInput = '[data-automation-id="password-input"]';
-    this.loginSubmitButton = '[data-automation-id="login-submit-button"]';
-    this.togglePasswordVisibility =
-      '[data-automation-id="toggle-password-visibility"]';
+    this.submitButton = '[data-automation-id="login-submit-button"]';
     this.loginForm = '[data-automation-id="login-form"]';
     this.loginContainer = '[data-automation-id="login-container"]';
+    this.loginPage = '[data-automation-id="login-page"]';
     this.errorMessage = '.text-red-600';
-    this.demoCredentials = '.bg-gray-50';
+    this.todoApp = '[data-automation-id="todo-app"]';
+    this.timeout = 10000;
   }
 
   visitLoginPage() {
-    cy.visit('/login');
+    cy.visit('/login', { timeout: this.timeout });
+    cy.get(this.loginPage, { timeout: this.timeout }).should('be.visible');
+    cy.get(this.loginContainer, { timeout: this.timeout }).should('be.visible');
   }
 
-  loginWithValidCredentials(email, password) {
-    cy.get(this.emailInput).should('be.visible').clear().type(email);
-
-    cy.get(this.passwordInput).should('be.visible').clear().type(password);
-
-    cy.get(this.loginSubmitButton)
+  fillCredentials(email, password) {
+    cy.get(this.emailInput, { timeout: this.timeout })
       .should('be.visible')
-      .should('not.be.disabled')
+      .clear()
+      .type(email);
+
+    cy.get(this.passwordInput, { timeout: this.timeout })
+      .should('be.visible')
+      .clear()
+      .type(password);
+  }
+
+  submitLogin() {
+    cy.get(this.submitButton, { timeout: this.timeout })
+      .should('be.visible')
+      .and('not.be.disabled')
       .click();
   }
 
-  loginWithInvalidCredentials(email, password) {
-    cy.get(this.emailInput).should('be.visible').clear().type(email);
+  verifyLoginFormVisible() {
+    cy.get(this.loginForm, { timeout: this.timeout }).should('be.visible');
+    cy.get(this.loginContainer, { timeout: this.timeout }).should('be.visible');
+    cy.get(this.emailInput, { timeout: this.timeout }).should('be.visible');
+    cy.get(this.passwordInput, { timeout: this.timeout }).should('be.visible');
+    cy.get(this.submitButton, { timeout: this.timeout }).should('be.visible');
+  }
 
-    cy.get(this.passwordInput).should('be.visible').clear().type(password);
-
-    cy.get(this.loginSubmitButton)
+  verifyErrorMessage(expectedError) {
+    cy.get(this.errorMessage, { timeout: this.timeout })
       .should('be.visible')
-      .should('not.be.disabled')
-      .click();
-  }
-
-  togglePasswordVisibility() {
-    cy.get(this.togglePasswordVisibility).should('be.visible').click();
-  }
-
-  verifyLoginFormIsVisible() {
-    cy.get(this.loginForm).should('be.visible');
-    cy.get(this.loginContainer).should('be.visible');
-  }
-
-  verifyErrorMessage(message) {
-    cy.get(this.errorMessage).should('be.visible').and('contain.text', message);
+      .and('contain.text', expectedError);
   }
 
   verifySuccessfulLogin() {
-    // Should redirect to todos page
-    cy.url().should('include', '/todos');
-
-    // Should show the todo app header
-    cy.get('[data-automation-id="todo-app"]').should('be.visible');
-  }
-
-  verifyDemoCredentialsAreVisible() {
-    cy.get(this.demoCredentials)
-      .should('be.visible')
-      .and('contain.text', 'demo@example.com')
-      .and('contain.text', 'password');
-  }
-
-  clearForm() {
-    cy.get(this.emailInput).clear();
-    cy.get(this.passwordInput).clear();
+    cy.url({ timeout: this.timeout }).should('include', '/todos');
+    cy.get(this.todoApp, { timeout: this.timeout }).should('be.visible');
   }
 }
 
