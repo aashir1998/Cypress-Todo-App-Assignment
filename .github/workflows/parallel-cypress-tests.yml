@@ -118,16 +118,16 @@ jobs:
           curl -f http://localhost:${{ matrix.backend-port }}/health || exit 1
           echo "All servers are running successfully!"
 
-      # Run Cypress tests
+      # Run Cypress tests directly
       - name: Run ${{ matrix.description }}
-        uses: cypress-io/github-action@v6
-        with:
-          working-directory: .
-          command: npm run e2e:${{ matrix.test-suite }}:tests:ci
-          wait-on: 'http://localhost:${{ matrix.frontend-port }},http://localhost:${{ matrix.backend-port }}'
-          wait-on-timeout: 120
+        run: |
+          cd "Automation Framework"
+          npx cypress run --env grepTags=${{ matrix.tag }},grepFilterSpecs=true
         env:
           CI: true
+          CYPRESS_BASE_URL: http://localhost:${{ matrix.frontend-port }}
+          CYPRESS_TODO_API_URL: http://localhost:${{ matrix.backend-port }}
+          CYPRESS_TODO_APP_URL: http://localhost:${{ matrix.frontend-port }}
 
       # Upload artifacts
       - name: Upload test report
