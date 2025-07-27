@@ -19,6 +19,18 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install Automation Framework dependencies
+        run: cd "Automation Framework" && npm install
+
+      - name: Install backend dependencies
+        run: cd "Todo App/backend" && npm install
+
+      - name: Install frontend dependencies
+        run: cd "Todo App/frontend" && npm install
+
       - name: Run regression tests with CI
         run: npm run ci:regression
         env:
