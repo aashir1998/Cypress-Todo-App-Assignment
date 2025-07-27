@@ -6,6 +6,9 @@ cypress/screenshots/
 cypress/reports/
 
 # Prevent Cypress files in root (use Automation Framework instead)
-cypress/
-cypress.config.js
-cypress.config.ts
+/cypress/
+/cypress.config.js
+/cypress.config.ts
+
+# Exclude reports from Automation Framework
+Automation Framework/cypress/reports/

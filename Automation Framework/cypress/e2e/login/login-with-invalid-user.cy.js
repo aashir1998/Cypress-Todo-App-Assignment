@@ -2,7 +2,7 @@
 
 import Login from '../../support/Login';
 
-describe('Login with Invalid User', { tags: ['@Login', '@Regression'] }, () => {
+describe('Login with Invalid User', { tags: ['@Login', '@Smoke'] }, () => {
   let invalidCredentials;
 
   before(() => {

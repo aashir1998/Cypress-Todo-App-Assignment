@@ -2,7 +2,7 @@
 
 import Login from '../../support/Login';
 
-describe('Login with Valid User', { tags: ['@Login', '@Regression'] }, () => {
+describe('Login with Valid User', { tags: ['@Login', '@Smoke'] }, () => {
   let validCredentials;
 
   before(() => {
