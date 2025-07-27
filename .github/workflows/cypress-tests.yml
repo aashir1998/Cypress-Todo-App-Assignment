@@ -1,4 +1,4 @@
-name: Cypress Tests
+name: Cypress Regression Tests
 
 on:
   push:
@@ -8,54 +8,116 @@ on:
 
 jobs:
   regression-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+
     steps:
-      - name: Checkout code
+      # ----------------------
+      # Step 1: Checkout Code
+      # ----------------------
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ----------------------
+      # Step 2: Setup Node.js
+      # ----------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
 
-      - name: Install root dependencies
-        run: npm install
+      # ----------------------
+      # Step 3: Cache Dependencies
+      # ----------------------
+      - name: Cache root node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: root-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
-      - name: Install Automation Framework dependencies
-        run: cd "Automation Framework" && npm install
+      - name: Cache Automation Framework node_modules
+        uses: actions/cache@v4
+        with:
+          path: Automation Framework/node_modules
+          key: af-${{ runner.os }}-${{ hashFiles('Automation Framework/package-lock.json') }}
 
-      - name: Install backend dependencies
-        run: cd "Todo App/backend" && npm install
+      - name: Cache Backend node_modules
+        uses: actions/cache@v4
+        with:
+          path: Todo App/backend/node_modules
+          key: backend-${{ runner.os }}-${{ hashFiles('Todo App/backend/package-lock.json') }}
 
-      - name: Install frontend dependencies
-        run: cd "Todo App/frontend" && npm install
+      - name: Cache Frontend node_modules
+        uses: actions/cache@v4
+        with:
+          path: Todo App/frontend/node_modules
+          key: frontend-${{ runner.os }}-${{ hashFiles('Todo App/frontend/package-lock.json') }}
 
-      - name: Run regression tests with CI
-        run: npm run ci:regression
+      # ----------------------
+      # Step 4: Install Dependencies
+      # ----------------------
+      - name: Install all dependencies (root + backend + frontend + Cypress)
+        run: npm run install:all
+
+      # ----------------------
+      # Step 5: Start Application (FE + BE)
+      # ----------------------
+      - name: Start backend and frontend
+        run: |
+          npm run start &
+      
+      # ----------------------
+      # Step 6: Healthcheck (Wait until FE & BE are ready)
+      # ----------------------
+      - name: Wait for services to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:3000 >/dev/null && curl -s http://localhost:5000 >/dev/null; then
+              echo "Frontend & Backend are running"
+              break
+            fi
+            echo "Waiting for services..."
+            sleep 2
+          done
+
+      # ----------------------
+      # Step 7: Run Regression Tests with @Regression Tag
+      # ----------------------
+      - name: Run Cypress Regression Tests
+        working-directory: Automation Framework
+        run: npm run e2e:regression:tests:ci
         env:
           CI: true
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
+      # ----------------------
+      # Step 8: Upload Cypress Reports (HTML)
+      # ----------------------
+      - name: Upload Cypress HTML Report
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: regression-test-results
-          path: Automation Framework/cypress/reports/
+          name: Cypress Regression HTML Report
+          path: Automation Framework/cypress/reports/html
           retention-days: 30
 
-      - name: Upload screenshots
-        uses: actions/upload-artifact@v4
+      # ----------------------
+      # Step 9: Upload Screenshots (on failure)
+      # ----------------------
+      - name: Upload Screenshots
         if: failure()
+        uses: actions/upload-artifact@v4
         with:
-          name: screenshots
-          path: Automation Framework/cypress/screenshots/
+          name: Cypress Screenshots
+          path: Automation Framework/cypress/screenshots
           retention-days: 30
 
-      - name: Upload videos
-        uses: actions/upload-artifact@v4
+      # ----------------------
+      # Step 10: Upload Videos
+      # ----------------------
+      - name: Upload Cypress Videos
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: videos
-          path: Automation Framework/cypress/videos/
+          name: Cypress Videos
+          path: Automation Framework/cypress/videos
           retention-days: 30
