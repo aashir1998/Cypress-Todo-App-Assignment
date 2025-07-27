@@ -1,7 +1,7 @@
-import globals from 'globals';
-import pluginJs from '@eslint/js';
-import pluginCypress from 'eslint-plugin-cypress/flat';
-import eslintConfigPrettier from 'eslint-config-prettier';
+import globals from '../node_modules/globals/index.js';
+import pluginJs from '../node_modules/@eslint/js/dist/index.js';
+import pluginCypress from '../node_modules/eslint-plugin-cypress/flat.js';
+import eslintConfigPrettier from '../node_modules/eslint-config-prettier/index.js';
 
 /** @type {import('eslint').Linter.FlatConfig[]} */
 export default [

@@ -1,9 +1,9 @@
-require('dotenv').config();
+require('../node_modules/dotenv/lib/main').config();
 
-const { defineConfig } = require('cypress');
+const { defineConfig } = require('../node_modules/cypress/lib/cypress');
 
 module.exports = defineConfig({
-  reporter: 'cypress-mochawesome-reporter',
+  reporter: '../node_modules/cypress-mochawesome-reporter',
   chromeWebSecurity: false,
   pageLoadTimeout: 120000,
   defaultCommandTimeout: 10000,
@@ -23,8 +23,8 @@ module.exports = defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       // Essential plugins only
-      require('@cypress/grep/src/plugin')(config);
-      require('cypress-mochawesome-reporter/plugin')(on);
+      require('../node_modules/@cypress/grep/src/plugin')(config);
+      require('../node_modules/cypress-mochawesome-reporter/plugin')(on);
 
       return config;
     },
