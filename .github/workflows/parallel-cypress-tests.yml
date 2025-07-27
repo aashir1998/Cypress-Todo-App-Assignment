@@ -8,9 +8,6 @@ on:
 
 env:
   NODE_VERSION: "18"
-  CYPRESS_BASE_URL: http://localhost:3000
-  CYPRESS_TODO_API_URL: http://localhost:3001
-  CYPRESS_TODO_APP_URL: http://localhost:3000
 
 jobs:
   cypress-tests:
@@ -24,9 +21,18 @@ jobs:
           - test-suite: smoke
             tag: '@Smoke'
             description: 'Smoke Tests'
+            backend-port: 3001
+            frontend-port: 3000
           - test-suite: regression
             tag: '@Regression'
             description: 'Regression Tests'
+            backend-port: 3002
+            frontend-port: 3003
+
+    env:
+      CYPRESS_BASE_URL: http://localhost:${{ matrix.frontend-port }}
+      CYPRESS_TODO_API_URL: http://localhost:${{ matrix.backend-port }}
+      CYPRESS_TODO_APP_URL: http://localhost:${{ matrix.frontend-port }}
 
     steps:
       - name: Checkout code
@@ -62,15 +68,40 @@ jobs:
         env:
           NODE_ENV: development
 
-      # Start application servers
-      - name: Start application servers
-        run: npm start &
+      # Start backend server with health check
+      - name: Start backend server
+        run: |
+          cd "Todo App/backend"
+          PORT=${{ matrix.backend-port }} npm start &
+          echo "Backend server starting on port ${{ matrix.backend-port }}..."
+          # Wait for backend to be ready
+          timeout 60 bash -c 'until curl -f http://localhost:${{ matrix.backend-port }}/health; do sleep 2; done'
+          echo "Backend server is ready!"
         env:
-          REACT_APP_API_URL: http://localhost:3001
           NODE_ENV: development
-          BROWSER: none
           CI: true
 
+      # Start frontend server with health check
+      - name: Start frontend server
+        run: |
+          cd "Todo App/frontend"
+          PORT=${{ matrix.frontend-port }} REACT_APP_API_URL=http://localhost:${{ matrix.backend-port }} BROWSER=none npm start &
+          echo "Frontend server starting on port ${{ matrix.frontend-port }}..."
+          # Wait for frontend to be ready
+          timeout 60 bash -c 'until curl -f http://localhost:${{ matrix.frontend-port }}; do sleep 2; done'
+          echo "Frontend server is ready!"
+        env:
+          REACT_APP_API_URL: http://localhost:${{ matrix.backend-port }}
+          NODE_ENV: development
+          CI: true
+
+      # Verify servers are running
+      - name: Verify servers are running
+        run: |
+          echo "Verifying servers..."
+          curl -f http://localhost:${{ matrix.frontend-port }} || exit 1
+          curl -f http://localhost:${{ matrix.backend-port }}/health || exit 1
+          echo "All servers are running successfully!"
 
       # Run Cypress tests
       - name: Run ${{ matrix.description }}
@@ -78,6 +109,8 @@ jobs:
         with:
           working-directory: .
           command: npm run e2e:${{ matrix.test-suite }}:tests:ci
+          wait-on: 'http://localhost:${{ matrix.frontend-port }},http://localhost:${{ matrix.backend-port }}'
+          wait-on-timeout: 120
         env:
           CI: true
 
