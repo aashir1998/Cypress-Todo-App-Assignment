@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-suite: [smoke, regression]
+        test-suite: [smoke, regression, api]
         include:
           - test-suite: smoke
             tag: '@Smoke'
@@ -28,6 +28,11 @@ jobs:
             description: 'Regression Tests'
             backend-port: 3002
             frontend-port: 3003
+          - test-suite: api
+            tag: '@API'
+            description: 'API Tests'
+            backend-port: 3004
+            frontend-port: 3005
 
     env:
       CYPRESS_BASE_URL: http://localhost:${{ matrix.frontend-port }}
@@ -96,8 +101,9 @@ jobs:
           NODE_ENV: development
           CI: true
 
-      # Start frontend server with health check
+      # Start frontend server with health check (only for smoke and regression tests)
       - name: Start frontend server
+        if: matrix.test-suite != 'api'
         run: |
           cd "Todo App/frontend"
           PORT=${{ matrix.frontend-port }} REACT_APP_API_URL=http://localhost:${{ matrix.backend-port }} BROWSER=none npm start &
@@ -114,8 +120,10 @@ jobs:
       - name: Verify servers are running
         run: |
           echo "Verifying servers..."
-          curl -f http://localhost:${{ matrix.frontend-port }} || exit 1
           curl -f http://localhost:${{ matrix.backend-port }}/health || exit 1
+          if [ "${{ matrix.test-suite }}" != "api" ]; then
+            curl -f http://localhost:${{ matrix.frontend-port }} || exit 1
+          fi
           echo "All servers are running successfully!"
 
       # Run Cypress tests directly

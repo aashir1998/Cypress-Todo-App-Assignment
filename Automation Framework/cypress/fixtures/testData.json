@@ -37,5 +37,26 @@
         "expectedError": "Invalid email or password. Use demo@example.com / password"
       }
     ]
+  },
+  "todoData": {
+    "validTodo": {
+      "title": "Test Todo Item",
+      "completed": false
+    },
+    "invalidTodo": {
+      "title": "",
+      "completed": "invalid"
+    },
+    "updateData": {
+      "title": "Updated Todo Item",
+      "completed": true
+    },
+    "patchData": {
+      "title": "Patched Todo Item"
+    },
+    "testIds": {
+      "validId": "1",
+      "invalidId": "invalid-id"
+    }
   }
 }
