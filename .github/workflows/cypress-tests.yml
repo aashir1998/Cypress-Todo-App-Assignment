@@ -1,4 +1,4 @@
-name: Cypress Regression Tests
+name: Cypress E2E Tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [master]
 
 jobs:
-  regression-tests:
+  e2e-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -52,19 +52,34 @@ jobs:
         run: npx cypress install
         working-directory: Automation Framework
 
-      # Start both FE and BE
+      # Start both FE and BE (Backend: 3001, Frontend: 3000)
       - name: Start BE and FE Server
         run: npm start &
         env:
-          PORT: 3000
           REACT_APP_API_URL: http://localhost:3001
           NODE_ENV: development
           BROWSER: none
           CI: true
 
-      
-      - name: Run Cypress Regression Tests
-        run: npm run e2e:regression:tests:ci
+      # Wait for servers to be ready
+      - name: Wait for servers
+        run: |
+          echo "Giving servers time to start up..."
+          sleep 15
+          
+          echo "Waiting for backend server on port 3001..."
+          timeout 60 bash -c 'until curl -s http://localhost:3001/health > /dev/null; do sleep 2; done'
+          echo "Backend server is ready!"
+          
+          echo "Waiting for frontend server on port 3000..."
+          timeout 60 bash -c 'until curl -s http://localhost:3000 > /dev/null; do sleep 2; done'
+          echo "Frontend server is ready!"
+          
+          echo "Both servers are ready for testing!"
+
+      # Run all Cypress tests
+      - name: Run Cypress Tests
+        run: npm run cy:run
         env:
           CI: true
           CYPRESS_BASE_URL: http://localhost:3000
