@@ -8,30 +8,17 @@
     "Todo App/backend"
   ],
   "scripts": {
-  "cy:verify": "cypress verify --project 'Automation Framework'",
   "cy:open": "cypress open --project 'Automation Framework'",
   "cy:run": "cypress run --project 'Automation Framework'",
-  "e2e:smoke:tests": "cypress run --project 'Automation Framework' --env grepTags=@Smoke,grepFilterSpecs=true",
-  "e2e:regression:tests": "cypress run --project 'Automation Framework' --env grepTags=@Regression,grepFilterSpecs=true",
-  "e2e:regression:tests:ci": "cypress run --project 'Automation Framework' --env grepTags=@Regression,grepFilterSpecs=true --browser chrome --headless --config video=false,screenshotOnRunFailure=true --reporter cypress-mochawesome-reporter --reporter-options reportDir=cypress/reports,overwrite=false,html=true,json=true",
+  "cy:verify": "cypress verify --project 'Automation Framework'",
+  "install:all": "npm ci --prefer-offline --no-audit && cd 'Todo App/frontend' && npm ci --prefer-offline --no-audit && cd ../backend && npm ci --prefer-offline --no-audit",
 
-  "install:backend": "cd 'Todo App/backend' && npm install",
-  "install:frontend": "cd 'Todo App/frontend' && npm install",
-  "install:all": "npm install && npm run install:backend && npm run install:frontend",
-  "install:ci": "npm ci --prefer-offline --no-audit && cd 'Todo App/backend' && npm ci --prefer-offline --no-audit && cd '../frontend' && npm ci --prefer-offline --no-audit",
-  "start:backend": "cd 'Todo App/backend' && npm start",
-  "start:frontend": "cd 'Todo App/frontend' && npm start",
-  "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
-  "start": "npm run dev",
-    "start:ci": "npm run start &",
-  "health:check": "curl -sf http://localhost:3001/health && curl -sf http://localhost:3000",
-  "wait:services": "for i in {1..30}; do npm run health:check && exit 0 || (echo \"⏳ Waiting for services ($i/30)...\" && sleep 2); done; echo \"❌ Services failed to start\"; exit 1",
-  "ci:start-and-wait": "npm run start:ci && (npm run wait:services || (echo '⚠️ Health check failed, sleeping 30s' && sleep 30))",
-  "ci:test": "npm run e2e:regression:tests:ci",
-  "ci:regression": "npm run install:ci && npm run ci:start-and-wait && npm run ci:test",
-  "report:merge": "npx mochawesome-merge 'Automation Framework/cypress/reports/json/*.json' > 'Automation Framework/cypress/reports/mochawesome.json' && npx marge 'Automation Framework/cypress/reports/mochawesome.json' -f report -o 'Automation Framework/cypress/reports/html'",
-  "report:open": "open 'Automation Framework/cypress/reports/html/index.html'"
-  },
+  "test:regression": "npm run cy:run -- --env grepTags=@Regression,grepFilterSpecs=true",
+
+  "test:regression:report": "npm run test:regression && npx mochawesome-merge 'Automation Framework/cypress/reports/json/*.json' > 'Automation Framework/cypress/reports/mochawesome.json' && npx marge 'Automation Framework/cypress/reports/mochawesome.json' -f report -o 'Automation Framework/cypress/reports/html' && open 'Automation Framework/cypress/reports/html/index.html'",
+
+  "ci:regression": "npm run install:all && npm run start & sleep 30 && npm run cy:run -- --env grepTags=@Regression,grepFilterSpecs=true --browser chrome --headless --config video=false,screenshotOnRunFailure=true --reporter cypress-mochawesome-reporter --reporter-options reportDir=cypress/reports,overwrite=false,html=true,json=true"
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aashir1998/Cypress-Todo-App-Assignment.git"

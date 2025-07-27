@@ -57,28 +57,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-deps-
 
-      # Install dependencies
-      - name: 📦 Install dependencies
-        run: npm run install:ci
-
-      # Start services & wait
-      - name: 🚀 Start services & wait
-        run: npm run ci:start-and-wait
-
-      # Run Cypress regression tests
+      # Run CI Regression Flow (install + start services + tests)
       - name: 🧪 Run Cypress Regression Tests
-        run: npm run ci:test
+        run: npm run ci:regression
         env:
           CYPRESS_VIDEO: false
           CYPRESS_SCREENSHOTS: true
           CYPRESS_CHROME_FLAGS: --no-sandbox --disable-dev-shm-usage
 
-      # Merge Mochawesome JSON into single HTML report
-      - name: 🧩 Merge Cypress Reports
-        if: always()
-        run: npm run report:merge
-
-      # Upload combined report (always)
+      # Upload report (always)
       - name: 📊 Upload Cypress Report
         uses: actions/upload-artifact@v4
         if: always()
@@ -86,7 +73,6 @@ jobs:
           name: cypress-report-${{ github.run_number }}
           path: Automation Framework/cypress/reports/html
           retention-days: 7
-          compression-level: 6
 
       # Upload failure artifacts (screenshots/videos only on failure)
       - name: 📸 Upload Failure Artifacts
