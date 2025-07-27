@@ -42,7 +42,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          # Temporarily disable cache to avoid npm issues
+          # cache: 'npm'
 
       # Clean up any existing node_modules and cache
       - name: Clean up existing installations
@@ -52,26 +53,16 @@ jobs:
           rm -rf "Todo App/backend/node_modules"
           rm -rf "Automation Framework/node_modules"
           npm cache clean --force
-
-      # Cache dependencies
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules
-            Todo App/frontend/node_modules
-            Todo App/backend/node_modules
-            ~/.cache/Cypress
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-deps-
+          # Remove problematic cache directories
+          rm -rf /home/runner/.npm/_cacache
+          rm -rf /home/runner/.npm/_logs
 
       # Install dependencies with better error handling
       - name: Install dependencies
         run: |
-          npm install --no-audit --no-fund --prefer-offline
-          cd "Todo App/frontend" && npm install --no-audit --no-fund --prefer-offline
-          cd "../backend" && npm install --no-audit --no-fund --prefer-offline
+          npm install --no-audit --no-fund --prefer-offline --legacy-peer-deps
+          cd "Todo App/frontend" && npm install --no-audit --no-fund --prefer-offline --legacy-peer-deps
+          cd "../backend" && npm install --no-audit --no-fund --prefer-offline --legacy-peer-deps
         env:
           NODE_ENV: development
 
