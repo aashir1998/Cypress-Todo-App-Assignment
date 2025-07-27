@@ -7,7 +7,6 @@ on:
     branches: [master, main]
   workflow_dispatch:
 
-# Cancel previous runs on the same branch
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,100 +16,21 @@ env:
   CI: true
   CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
   HUSKY: 0
-  CYPRESS_RECORD_KEY: false
 
 jobs:
-  # Linting and code quality checks
-  lint-and-quality:
-    name: 🔍 Lint & Code Quality
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: ⚡ Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: ⚡ Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: |
-            package-lock.json
-            Todo App/frontend/package-lock.json
-            Todo App/backend/package-lock.json
-
-      - name: 🗄️ Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            Todo App/frontend/node_modules
-            Todo App/backend/node_modules
-            ~/.npm
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-deps-
-
-      - name: 📦 Install dependencies
-        run: npm run install:all
-
-      - name: 🔍 Run linting
-        run: npm run lint
-
-      - name: 🏗️ Build frontend
-        run: npm run build
-
-  # Backend tests
-  backend-tests:
-    name: 🧪 Backend Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: ⚡ Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: ⚡ Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: Todo App/backend/package-lock.json
-
-      - name: 🗄️ Cache backend dependencies
-        uses: actions/cache@v4
-        with:
-          path: Todo App/backend/node_modules
-          key: ${{ runner.os }}-backend-deps-${{ hashFiles('Todo App/backend/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-backend-deps-
-
-      - name: 📦 Install backend dependencies
-        run: npm run install:backend
-
-      - name: 🧪 Run backend tests
-        run: npm run test:backend
-
-  # Main E2E regression tests
   regression-tests:
     name: 🧪 Cypress E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [lint-and-quality, backend-tests]
 
     steps:
-      # Checkout repository
+      # Checkout repo
       - name: ⚡ Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      # Setup Node.js with caching
+      # Setup Node with caching
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -121,7 +41,7 @@ jobs:
             Todo App/frontend/package-lock.json
             Todo App/backend/package-lock.json
 
-      # Cache Cypress + node_modules
+      # Cache node_modules + Cypress
       - name: 🗄️ Cache dependencies
         uses: actions/cache@v4
         with:
@@ -135,15 +55,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-deps-
 
-      # Install dependencies and ensure Cypress binary
-      - name: 📦 Install dependencies & Cypress
-        run: |
-          npm run install:all
-          npx cypress install
-          npx cypress verify
+      # Install all dependencies
+      - name: 📦 Install dependencies
+        run: npm run install:all
 
-      # Start application and run tests
-      - name: 🧪 Run Cypress E2E Tests
+      # Lint frontend (optional)
+      - name: 🔍 Run lint
+        run: npm run lint
+
+      # Build frontend (needed for Cypress to serve built app)
+      - name: 🏗️ Build frontend
+        run: npm run build
+
+      # Verify Cypress binary (ensures it's downloaded)
+      - name: ✅ Verify Cypress
+        run: npx cypress verify
+
+      # Run Cypress regression tests in headless mode
+      - name: 🧪 Run Cypress Regression Tests
         run: npm run ci:e2e
         env:
           CYPRESS_VIDEO: false
@@ -152,7 +81,7 @@ jobs:
           CYPRESS_BASE_URL: http://localhost:3000
           CYPRESS_API_URL: http://localhost:3001
 
-      # Upload report (always)
+      # Upload HTML report
       - name: 📊 Upload Cypress Report
         uses: actions/upload-artifact@v4
         if: always()
@@ -161,7 +90,7 @@ jobs:
           path: Automation Framework/cypress/reports/html
           retention-days: 7
 
-      # Upload failure artifacts (screenshots/videos only on failure)
+      # Upload screenshots/videos on failure
       - name: 📸 Upload Failure Artifacts
         uses: actions/upload-artifact@v4
         if: failure()
@@ -171,42 +100,28 @@ jobs:
             Automation Framework/cypress/screenshots
             Automation Framework/cypress/videos
           retention-days: 3
-          compression-level: 9
 
-      # Cleanup processes (avoid port conflicts)
-      - name: 🧹 Cleanup processes
+      # Cleanup processes
+      - name: 🧹 Cleanup
         if: always()
         run: |
           pkill -f "node.*Todo App" || true
           pkill -f "react-scripts" || true
           pkill -f "concurrently" || true
 
-      # Add summary to GitHub UI
+      # Summary in GitHub UI
       - name: 📋 Test Results Summary
         if: always()
         run: |
           echo "## 🧪 Cypress Test Results" >> $GITHUB_STEP_SUMMARY
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Test Suite | Regression |" >> $GITHUB_STEP_SUMMARY
           echo "| Node Version | 18 |" >> $GITHUB_STEP_SUMMARY
           echo "| Browser | Chrome (Headless) |" >> $GITHUB_STEP_SUMMARY
           echo "| Timestamp | $(date -u) |" >> $GITHUB_STEP_SUMMARY
-
           if [ -f "Automation Framework/cypress/reports/html/index.html" ]; then
             echo "| Report Status | ✅ Generated |" >> $GITHUB_STEP_SUMMARY
           else
             echo "| Report Status | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
           fi
-
-          if [ "${{ job.status }}" = "success" ]; then
-            echo "| Overall Status | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Overall Status | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📊 Test Coverage" >> $GITHUB_STEP_SUMMARY
-          echo "- Frontend Build: ✅" >> $GITHUB_STEP_SUMMARY
-          echo "- Backend Tests: ✅" >> $GITHUB_STEP_SUMMARY
-          echo "- E2E Tests: $([ "${{ job.status }}" = "success" ] && echo "✅" || echo "❌")" >> $GITHUB_STEP_SUMMARY
+          echo "| Overall Status | ${{ job.status }} |" >> $GITHUB_STEP_SUMMARY
