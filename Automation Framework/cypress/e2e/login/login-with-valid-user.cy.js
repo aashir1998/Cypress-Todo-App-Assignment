@@ -14,6 +14,6 @@ describe('Login with Valid User', { tags: ['@Login', '@Regression'] }, () => {
   it('should log in successfully with valid credentials', () => {
     const login = new Login();
 
-   login.loginWithValidUser(validCredentials);
+    login.loginWithValidUser(validCredentials);
   });
 });

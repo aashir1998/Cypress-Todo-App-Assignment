@@ -7,20 +7,30 @@
     "Todo App/frontend",
     "Todo App/backend"
   ],
- "scripts": {
-  "clean": "rm -rf node_modules 'Todo App/frontend/node_modules' 'Todo App/backend/node_modules' 'Automation Framework/node_modules'",
-  "install:all": "npm install && npm run install:frontend && npm run install:backend",
-  "install:frontend": "cd 'Todo App/frontend' && npm install",
-  "install:backend": "cd 'Todo App/backend' && npm install",
-
-  "start:backend": "cd 'Todo App/backend' && npm start",
-  "start:frontend": "cd 'Todo App/frontend' && npm start",
-  "start": "sh -c \"npm run start:backend & sleep 5 && npm run start:frontend & wait\"",
-  "cy:verify": "cd 'Automation Framework' && cypress verify",
-  "cy:run": "cd 'Automation Framework' && cypress run",
-  "e2e:regression:tests": "cd 'Automation Framework' && cypress run --env grepTags=@Regression,grepFilterSpecs=true",
-  "e2e:regression:tests:ci": "cd 'Automation Framework' && cypress run --env grepTags=@Regression,grepFilterSpecs=true"
-},
+  "scripts": {
+    "clean": "rm -rf node_modules 'Todo App/frontend/node_modules' 'Todo App/backend/node_modules' 'Automation Framework/node_modules'",
+    "install:all": "npm install && npm run install:frontend && npm run install:backend",
+    "install:frontend": "cd 'Todo App/frontend' && npm install",
+    "install:backend": "cd 'Todo App/backend' && npm install",
+    "start:backend": "cd 'Todo App/backend' && npm start",
+    "start:frontend": "cd 'Todo App/frontend' && npm start",
+    "start": "sh -c \"npm run start:backend  && npm run start:frontend & wait\"",
+    "cy:verify": "cd 'Automation Framework' && cypress verify",
+    "cy:run": "cd 'Automation Framework' && cypress run",
+    "e2e:regression:tests": "cd 'Automation Framework' && cypress run --env grepTags=@Regression,grepFilterSpecs=true",
+    "e2e:regression:tests:ci": "cd 'Automation Framework' && cypress run --env grepTags=@Regression,grepFilterSpecs=true",
+    "format": "cd 'Automation Framework' && prettier --write \"../**/*.{js,jsx,ts,tsx,json,css,md,yml,yaml}\" --ignore-path .prettierignore",
+    "format:check": "cd 'Automation Framework' && prettier --check \"../**/*.{js,jsx,ts,tsx,json,css,md,yml,yaml}\" --ignore-path .prettierignore",
+    "format:fix": "npm run format && npm run lint:fix",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:fix": "npm run lint:fix:frontend && npm run lint:fix:backend",
+    "lint:frontend": "cd 'Todo App/frontend' && npm run lint",
+    "lint:fix:frontend": "cd 'Todo App/frontend' && npm run lint:fix",
+    "lint:backend": "cd 'Todo App/backend' && npm run lint || true",
+    "lint:fix:backend": "cd 'Todo App/backend' && npm run lint:fix || true",
+    "code:check": "npm run format:check && npm run lint",
+    "code:fix": "npm run format:fix"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aashir1998/Cypress-Todo-App-Assignment.git"

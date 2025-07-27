@@ -31,7 +31,10 @@ Cypress.on(
 
 // Add retry logic for rate limiting errors
 Cypress.on('fail', (error) => {
-  if (error.message.includes('Too many requests') || error.message.includes('429')) {
+  if (
+    error.message.includes('Too many requests') ||
+    error.message.includes('429')
+  ) {
     // Wait and retry for rate limiting errors
     cy.wait(2000);
     return false; // Don't fail the test, retry

@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FiSearch, FiX } from 'react-icons/fi';
+import React from "react";
+import { motion } from "framer-motion";
+import { FiSearch, FiX } from "react-icons/fi";
 
 const SearchBar = ({ searchTerm, onSearchChange, onClearSearch }) => {
   return (
@@ -45,7 +45,7 @@ const SearchBar = ({ searchTerm, onSearchChange, onClearSearch }) => {
           animate={{ opacity: 1 }}
           className="mt-2 text-sm text-gray-600"
         >
-          Searching for:{' '}
+          Searching for:{" "}
           <span className="font-medium text-blue-600">"{searchTerm}"</span>
         </motion.div>
       )}

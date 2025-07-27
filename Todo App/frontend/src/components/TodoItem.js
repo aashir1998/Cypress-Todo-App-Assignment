@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FiEdit2, FiTrash2, FiCheck } from 'react-icons/fi';
-import { format } from 'date-fns';
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiEdit2, FiTrash2, FiCheck } from "react-icons/fi";
+import { format } from "date-fns";
 
 const TodoItem = ({ todo, onToggle, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -35,9 +35,9 @@ const TodoItem = ({ todo, onToggle, onUpdate, onDelete }) => {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSave();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       handleCancel();
     }
   };
@@ -49,11 +49,11 @@ const TodoItem = ({ todo, onToggle, onUpdate, onDelete }) => {
   return (
     <motion.div
       className={`todo-item border-b border-gray-100 last:border-b-0 ${
-        todo.completed ? 'bg-gray-50' : 'bg-white'
+        todo.completed ? "bg-gray-50" : "bg-white"
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      whileHover={{ backgroundColor: todo.completed ? '#f9fafb' : '#f8fafc' }}
+      whileHover={{ backgroundColor: todo.completed ? "#f9fafb" : "#f8fafc" }}
       layout
       data-automation-id={`todo-item-${todo.id}`}
     >
@@ -64,15 +64,15 @@ const TodoItem = ({ todo, onToggle, onUpdate, onDelete }) => {
           className="flex-shrink-0"
           whileTap={{ scale: 0.9 }}
           aria-label={
-            todo.completed ? 'Mark as incomplete' : 'Mark as complete'
+            todo.completed ? "Mark as incomplete" : "Mark as complete"
           }
           data-automation-id={`todo-toggle-${todo.id}`}
         >
           <div
             className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors duration-200 ${
               todo.completed
-                ? 'bg-blue-600 border-blue-600'
-                : 'border-gray-300 hover:border-blue-400'
+                ? "bg-blue-600 border-blue-600"
+                : "border-gray-300 hover:border-blue-400"
             }`}
           >
             {todo.completed && <FiCheck className="w-3 h-3 text-white" />}
@@ -99,14 +99,14 @@ const TodoItem = ({ todo, onToggle, onUpdate, onDelete }) => {
                 <h3
                   className={`text-sm font-medium leading-5 ${
                     todo.completed
-                      ? 'line-through text-gray-500'
-                      : 'text-gray-900'
+                      ? "line-through text-gray-500"
+                      : "text-gray-900"
                   }`}
                 >
                   {todo.title}
                 </h3>
                 <p className="text-xs text-gray-400 mt-1">
-                  {format(new Date(todo.createdAt), 'MMM dd, yyyy • HH:mm')}
+                  {format(new Date(todo.createdAt), "MMM dd, yyyy • HH:mm")}
                 </p>
               </div>
             </div>
@@ -151,11 +151,11 @@ const TodoItem = ({ todo, onToggle, onUpdate, onDelete }) => {
           <span
             className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
               todo.completed
-                ? 'bg-green-100 text-green-800'
-                : 'bg-yellow-100 text-yellow-800'
+                ? "bg-green-100 text-green-800"
+                : "bg-yellow-100 text-yellow-800"
             }`}
           >
-            {todo.completed ? 'Completed' : 'Active'}
+            {todo.completed ? "Completed" : "Active"}
           </span>
         </div>
       </div>

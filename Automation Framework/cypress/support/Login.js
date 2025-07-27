@@ -68,7 +68,10 @@ class Login {
   loginWithInvalidUser(invalidCredentials) {
     this.visitLoginPage();
     this.verifyLoginFormVisible();
-    this.fillCredentials(invalidCredentials[0].email, invalidCredentials[0].password);
+    this.fillCredentials(
+      invalidCredentials[0].email,
+      invalidCredentials[0].password
+    );
     this.submitLogin();
     this.verifyErrorMessage(invalidCredentials[0].expectedError);
   }

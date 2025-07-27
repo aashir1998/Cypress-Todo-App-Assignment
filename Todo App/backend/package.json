@@ -9,7 +9,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "echo 'No linting configured for backend'"
+    "lint": "echo 'No linting configured for backend'",
+    "lint:fix": "echo 'No linting configured for backend'"
   },
   "keywords": [
     "todo",

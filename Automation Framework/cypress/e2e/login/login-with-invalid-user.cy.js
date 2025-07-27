@@ -17,4 +17,3 @@ describe('Login with Invalid User', { tags: ['@Login', '@Regression'] }, () => {
     login.loginWithInvalidUser(invalidCredentials);
   });
 });
-

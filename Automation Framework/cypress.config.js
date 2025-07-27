@@ -17,7 +17,7 @@ module.exports = defineConfig({
     todoApiUrl: process.env.CYPRESS_TODO_API_URL,
     todoAppUrl: process.env.CYPRESS_TODO_APP_URL,
     grepFilterSpecs: true,
-    grepOmitFiltered: true,
+    grepOmitFiltered: true
   },
 
   e2e: {

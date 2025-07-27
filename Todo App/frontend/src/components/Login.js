@@ -1,30 +1,30 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
-    setError('');
+    setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       // Simulate API call
@@ -32,21 +32,21 @@ const Login = ({ onLogin }) => {
 
       // Simple validation
       if (
-        formData.email === 'demo@example.com' &&
-        formData.password === 'password'
+        formData.email === "demo@example.com" &&
+        formData.password === "password"
       ) {
-        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem("isAuthenticated", "true");
         localStorage.setItem(
-          'user',
-          JSON.stringify({ email: formData.email, name: 'Demo User' })
+          "user",
+          JSON.stringify({ email: formData.email, name: "Demo User" }),
         );
-        onLogin({ email: formData.email, name: 'Demo User' });
-        navigate('/todos');
+        onLogin({ email: formData.email, name: "Demo User" });
+        navigate("/todos");
       } else {
-        setError('Invalid email or password. Use demo@example.com / password');
+        setError("Invalid email or password. Use demo@example.com / password");
       }
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +68,7 @@ const Login = ({ onLogin }) => {
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
             className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center"
           >
             <FiUser className="h-8 w-8 text-white" />
@@ -140,7 +140,7 @@ const Login = ({ onLogin }) => {
                 <input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
                   value={formData.password}
@@ -199,7 +199,7 @@ const Login = ({ onLogin }) => {
                 Signing in...
               </div>
             ) : (
-              'Sign in'
+              "Sign in"
             )}
           </motion.button>
         </motion.form>
