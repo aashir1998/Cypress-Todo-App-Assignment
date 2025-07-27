@@ -44,6 +44,15 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
+      # Clean up any existing node_modules and cache
+      - name: Clean up existing installations
+        run: |
+          rm -rf node_modules
+          rm -rf "Todo App/frontend/node_modules"
+          rm -rf "Todo App/backend/node_modules"
+          rm -rf "Automation Framework/node_modules"
+          npm cache clean --force
+
       # Cache dependencies
       - name: Cache dependencies
         uses: actions/cache@v3
@@ -57,9 +66,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-deps-
 
-      # Install dependencies
+      # Install dependencies with better error handling
       - name: Install dependencies
-        run: npm run install:all
+        run: |
+          npm install --no-audit --no-fund --prefer-offline
+          cd "Todo App/frontend" && npm install --no-audit --no-fund --prefer-offline
+          cd "../backend" && npm install --no-audit --no-fund --prefer-offline
         env:
           NODE_ENV: development
 
