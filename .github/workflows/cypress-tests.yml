@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: '18'
 
-      # 3. Cache dependencies (root + FE + BE + Cypress framework)
+      # 3. Cache dependencies (root + FE + BE)
       - name: Cache root node_modules
         uses: actions/cache@v3
         with:
@@ -41,30 +41,25 @@ jobs:
           path: Todo App/backend/node_modules
           key: ${{ runner.os }}-backend-${{ hashFiles('Todo App/backend/package-lock.json') }}
 
-      - name: Cache Automation Framework node_modules
-        uses: actions/cache@v3
-        with:
-          path: Automation Framework/node_modules
-          key: ${{ runner.os }}-automation-${{ hashFiles('Automation Framework/package-lock.json') }}
-
       # 4. Install all dependencies (root + FE + BE)
       - name: Install all dependencies
         run: npm run install:all
-
 
       # 5. Start full stack server (FE + BE concurrently)
       - name: Start server
         run: npm run start &
 
-     
+      # 6. Wait for server to be ready
+      - name: Wait for server
+        run: sleep 45
 
-      # . Run Cypress regression tests (tagged @Regression)
+      # 7. Run Cypress regression tests (tagged @Regression)
       - name: Run Cypress Regression Tests
         run: npm run e2e:regression:tests:ci
         env:
           CI: true
 
-      # 7. Upload Mochawesome HTML report
+      # 8. Upload Mochawesome HTML report
       - name: Upload HTML report
         uses: actions/upload-artifact@v4
         if: always()
@@ -72,7 +67,7 @@ jobs:
           name: Cypress HTML Report
           path: Automation Framework/cypress/reports/html
 
-      # 8. Upload screenshots ONLY on failure
+      # 9. Upload screenshots ONLY on failure
       - name: Upload screenshots
         uses: actions/upload-artifact@v4
         if: failure()
@@ -80,7 +75,7 @@ jobs:
           name: Cypress Screenshots
           path: Automation Framework/cypress/screenshots
 
-      # 9. Upload videos ONLY on failure
+      # 10. Upload videos ONLY on failure
       - name: Upload videos
         uses: actions/upload-artifact@v4
         if: failure()
