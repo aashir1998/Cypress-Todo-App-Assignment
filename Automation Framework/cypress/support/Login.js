@@ -56,6 +56,22 @@ class Login {
     cy.url({ timeout: this.timeout }).should('include', '/todos');
     cy.get(this.todoApp, { timeout: this.timeout }).should('be.visible');
   }
+
+  loginWithValidUser(validCredentials) {
+    this.visitLoginPage();
+    this.verifyLoginFormVisible();
+    this.fillCredentials(validCredentials.email, validCredentials.password);
+    this.submitLogin();
+    this.verifySuccessfulLogin();
+  }
+
+  loginWithInvalidUser(invalidCredentials) {
+    this.visitLoginPage();
+    this.verifyLoginFormVisible();
+    this.fillCredentials(invalidCredentials[0].email, invalidCredentials[0].password);
+    this.submitLogin();
+    this.verifyErrorMessage(invalidCredentials[0].expectedError);
+  }
 }
 
 export default Login;

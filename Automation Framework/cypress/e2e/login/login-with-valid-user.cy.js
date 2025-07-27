@@ -2,7 +2,7 @@
 
 import Login from '../../support/Login';
 
-describe('Login with Valid User', { tags: ['@Login', '@Smoke', '@Regression'] }, () => {
+describe('Login with Valid User', { tags: ['@Login', '@Regression'] }, () => {
   let validCredentials;
 
   before(() => {
@@ -14,12 +14,6 @@ describe('Login with Valid User', { tags: ['@Login', '@Smoke', '@Regression'] },
   it('should log in successfully with valid credentials', () => {
     const login = new Login();
 
-    login.visitLoginPage();
-    login.verifyLoginFormVisible();
-
-    login.fillCredentials(validCredentials.email, validCredentials.password);
-    login.submitLogin();
-
-    login.verifySuccessfulLogin();
+   login.loginWithValidUser(validCredentials);
   });
 });

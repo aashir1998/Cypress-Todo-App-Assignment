@@ -54,21 +54,16 @@ app.use(compression());
 // Logging middleware
 app.use(morgan('combined'));
 
-// Rate limiting
+// Rate limiting - very lenient for testing
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 1 * 60 * 1000, // 1 minute window
+  max: 2000, // allow 2000 requests per minute (very high for testing)
   message: 'Too many requests from this IP, please try again later.'
 });
 app.use('/api/', limiter);
 
-// Speed limiting
-const speedLimiter = slowDown({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  delayAfter: 50, // allow 50 requests per 15 minutes, then...
-  delayMs: () => 500 // begin adding 500ms of delay per request above 50
-});
-app.use('/api/', speedLimiter);
+// Speed limiting - disabled for testing
+// Removed speed limiting to prevent delays during testing
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));

@@ -3,6 +3,7 @@
 node_modules/
 cypress/videos/
 cypress/screenshots/
+cypress/reports/
 
 # Prevent Cypress files in root (use Automation Framework instead)
 cypress/

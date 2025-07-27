@@ -8,30 +8,22 @@
     "Todo App/backend"
   ],
   "scripts": {
-    "prettier-format": "prettier --config \"Automation Framework/.prettierrc\" '**/*.js' --write",
     "cy:verify": "cd \"Automation Framework\" && cypress verify",
     "cy:run": "cd \"Automation Framework\" && cypress run",
     "cy:open": "cd \"Automation Framework\" && cypress open",
     "e2e:smoke:tests": "cd \"Automation Framework\" && cypress run --env grepTags=@Smoke,grepFilterSpecs=true",
     "e2e:regression:tests": "cd \"Automation Framework\" && cypress run --env grepTags=@Regression,grepFilterSpecs=true",
-    "api:tests": "cd \"Automation Framework\" && cypress run --spec 'cypress/e2e/api/**/*.cy.js'",
-    "ui:tests": "cd \"Automation Framework\" && cypress run --spec 'cypress/e2e/ui/**/*.cy.js'",
+    "e2e:regression:tests:ci": "cd \"Automation Framework\" && cypress run --env grepTags=@Regression,grepFilterSpecs=true",
     "test:all": "cd \"Automation Framework\" && cypress run",
-    "test:headed": "cd \"Automation Framework\" && cypress run --headed",
-    "test:chrome": "cd \"Automation Framework\" && cypress run --browser chrome",
-    "test:firefox": "cd \"Automation Framework\" && cypress run --browser firefox",
-    "test:edge": "cd \"Automation Framework\" && cypress run --browser edge",
-    "test:mobile": "cd \"Automation Framework\" && cypress run --config viewportWidth=375,viewportHeight=667",
-    "test:tablet": "cd \"Automation Framework\" && cypress run --config viewportWidth=768,viewportHeight=1024",
-    "test:desktop": "cd \"Automation Framework\" && cypress run --config viewportWidth=1920,viewportHeight=1080",
-    "test:parallel": "cd \"Automation Framework\" && cypress run --parallel --record",
     "start:backend": "cd \"Todo App/backend\" && npm start",
     "start:frontend": "cd \"Todo App/frontend\" && npm start",
     "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "start": "npm run dev",
     "install:all": "npm install && npm run install:backend && npm run install:frontend",
     "install:backend": "cd \"Todo App/backend\" && npm install",
-    "install:frontend": "cd \"Todo App/frontend\" && npm install"
+    "install:frontend": "cd \"Todo App/frontend\" && npm install",
+    "ci:regression": "npm run install:all && npm run start & sleep 45 && npm run e2e:regression:tests:ci",
+    "generate:report:local": "npm run e2e:regression:tests && echo '✅ Report generated at: Automation Framework/cypress/reports/html/index.html' && open 'Automation Framework/cypress/reports/html/index.html'"
   },
   "repository": {
     "type": "git",
@@ -58,7 +50,7 @@
   "devDependencies": {
     "@cypress/grep": "^4.1.0",
     "@eslint/js": "^9.20.0",
-    "@faker-js/faker": "^9.5.0",
+    "@faker-js/faker": "^9.9.0",
     "concurrently": "^9.2.0",
     "cypress": "^14.5.3",
     "cypress-mochawesome-reporter": "^3.8.2",

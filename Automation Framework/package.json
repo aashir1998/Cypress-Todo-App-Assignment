@@ -1,0 +1,16 @@
+{
+  "name": "automation-framework",
+  "version": "1.0.0",
+  "description": "This folder contains the complete Cypress automation framework for testing Aashir's Todo App.",
+  "main": "cypress.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cypress-mochawesome-reporter": "^3.8.4"
+  }
+}
