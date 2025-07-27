@@ -1,4 +1,4 @@
-name: Parallel Cypress E2E Tests
+name: Sequential Cypress E2E Tests
 
 on:
   push:
@@ -8,37 +8,19 @@ on:
 
 env:
   NODE_VERSION: "18"
+  BACKEND_PORT: "3001"
+  FRONTEND_PORT: "3000"
+  BACKEND_URL: "http://localhost:3001"
+  FRONTEND_URL: "http://localhost:3000"
 
 jobs:
-  cypress-tests:
+  # Setup and start servers
+  setup-servers:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        test-suite: [smoke, regression, api]
-        include:
-          - test-suite: smoke
-            tag: '@Smoke'
-            description: 'Smoke Tests'
-            backend-port: 3001
-            frontend-port: 3000
-          - test-suite: regression
-            tag: '@Regression'
-            description: 'Regression Tests'
-            backend-port: 3002
-            frontend-port: 3003
-          - test-suite: api
-            tag: '@API'
-            description: 'API Tests'
-            backend-port: 3004
-            frontend-port: 3005
-
-    env:
-      CYPRESS_BASE_URL: http://localhost:${{ matrix.frontend-port }}
-      CYPRESS_TODO_API_URL: http://localhost:${{ matrix.backend-port }}
-      CYPRESS_TODO_APP_URL: http://localhost:${{ matrix.frontend-port }}
-
+    timeout-minutes: 10
+    outputs:
+      backend-port: ${{ steps.setup-backend.outputs.port }}
+      frontend-port: ${{ steps.setup-frontend.outputs.port }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -47,34 +29,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          # Temporarily disable cache to avoid npm issues
-          # cache: 'npm'
 
-      # Clean up any existing node_modules and cache
-      - name: Clean up existing installations
+      # Clean up and install dependencies
+      - name: Setup environment
         run: |
           rm -rf node_modules
           rm -rf "Todo App/frontend/node_modules"
           rm -rf "Todo App/backend/node_modules"
           rm -rf "Automation Framework/node_modules"
           npm cache clean --force
-          # Remove problematic cache directories
           rm -rf /home/runner/.npm/_cacache
           rm -rf /home/runner/.npm/_logs
 
-      # Regenerate package-lock.json files completely
-      - name: Regenerate package-lock.json files
-        run: |
-          rm -f package-lock.json
-          rm -f "Todo App/frontend/package-lock.json"
-          rm -f "Todo App/backend/package-lock.json"
-          npm install --package-lock-only
-          cd "Todo App/frontend" && npm install --package-lock-only
-          cd "../backend" && npm install --package-lock-only
-        env:
-          NODE_ENV: development
-
-      # Install dependencies with better error handling
       - name: Install dependencies
         run: |
           npm install --no-audit --no-fund --prefer-offline --legacy-peer-deps
@@ -88,31 +54,34 @@ jobs:
         env:
           NODE_ENV: development
 
-      # Start backend server with health check
+      # Start backend server
       - name: Start backend server
+        id: setup-backend
         run: |
           cd "Todo App/backend"
-          PORT=${{ matrix.backend-port }} npm start &
-          echo "Backend server starting on port ${{ matrix.backend-port }}..."
-          # Wait for backend to be ready
-          timeout 60 bash -c 'until curl -f http://localhost:${{ matrix.backend-port }}/health; do sleep 2; done'
+          PORT=${{ env.BACKEND_PORT }} npm start &
+          echo "Backend server starting on port ${{ env.BACKEND_PORT }}..."
+          timeout 60 bash -c 'until curl -f ${{ env.BACKEND_URL }}/health; do sleep 2; done'
           echo "Backend server is ready!"
+          echo "port=${{ env.BACKEND_PORT }}" >> $GITHUB_OUTPUT
         env:
           NODE_ENV: development
           CI: true
 
-      # Start frontend server with health check (only for smoke and regression tests)
+      # Start frontend server
       - name: Start frontend server
-        if: matrix.test-suite != 'api'
+        id: setup-frontend
         run: |
           cd "Todo App/frontend"
-          PORT=${{ matrix.frontend-port }} REACT_APP_API_URL=http://localhost:${{ matrix.backend-port }} BROWSER=none npm start &
-          echo "Frontend server starting on port ${{ matrix.frontend-port }}..."
-          # Wait for frontend to be ready
-          timeout 60 bash -c 'until curl -f http://localhost:${{ matrix.frontend-port }}; do sleep 2; done'
+          # Update proxy to match backend port
+          sed -i 's/"proxy": "http:\/\/localhost:3001"/"proxy": "${{ env.BACKEND_URL }}"/' package.json
+          PORT=${{ env.FRONTEND_PORT }} REACT_APP_API_URL=${{ env.BACKEND_URL }}/api BROWSER=none npm start &
+          echo "Frontend server starting on port ${{ env.FRONTEND_PORT }}..."
+          timeout 60 bash -c 'until curl -f ${{ env.FRONTEND_URL }}; do sleep 2; done'
           echo "Frontend server is ready!"
+          echo "port=${{ env.FRONTEND_PORT }}" >> $GITHUB_OUTPUT
         env:
-          REACT_APP_API_URL: http://localhost:${{ matrix.backend-port }}
+          REACT_APP_API_URL: ${{ env.BACKEND_URL }}
           NODE_ENV: development
           CI: true
 
@@ -120,41 +89,260 @@ jobs:
       - name: Verify servers are running
         run: |
           echo "Verifying servers..."
-          curl -f http://localhost:${{ matrix.backend-port }}/health || exit 1
-          if [ "${{ matrix.test-suite }}" != "api" ]; then
-            curl -f http://localhost:${{ matrix.frontend-port }} || exit 1
-          fi
+          curl -f ${{ env.BACKEND_URL }}/health || exit 1
+          curl -f ${{ env.FRONTEND_URL }} || exit 1
           echo "All servers are running successfully!"
 
-      # Run Cypress tests directly
-      - name: Run ${{ matrix.description }}
+  # API Tests - Run first after servers are ready
+  api-tests:
+    needs: setup-servers
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    outputs:
+      success: ${{ steps.run-tests.outputs.success }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Cypress
         run: |
           cd "Automation Framework"
-          npx cypress run --env grepTags=${{ matrix.tag }},grepFilterSpecs=true
+          npm install --no-audit --no-fund --prefer-offline --legacy-peer-deps
+          npm run cy:verify
+        env:
+          NODE_ENV: development
+
+      - name: Run API Tests
+        id: run-tests
+        run: |
+          cd "Automation Framework"
+          npx cypress run --env grepTags=@API,grepFilterSpecs=true
         env:
           CI: true
-          CYPRESS_BASE_URL: http://localhost:${{ matrix.frontend-port }}
-          CYPRESS_TODO_API_URL: http://localhost:${{ matrix.backend-port }}
-          CYPRESS_TODO_APP_URL: http://localhost:${{ matrix.frontend-port }}
+          CYPRESS_BASE_URL: ${{ env.BACKEND_URL }}
+          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}
+          CYPRESS_TODO_APP_URL: ${{ env.BACKEND_URL }}
 
-      # Upload artifacts
-      - name: Upload test report
+      - name: Upload API test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.description }} Report
+          name: API-Test-Report
           path: Automation Framework/cypress/reports/html
 
-      - name: Upload screenshots
+      - name: Upload API screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.description }} Screenshots
+          name: API-Screenshots
           path: Automation Framework/cypress/screenshots
 
-      - name: Upload videos
+      - name: Upload API videos
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.description }} Videos
-          path: Automation Framework/cypress/videos 
+          name: API-Videos
+          path: Automation Framework/cypress/videos
+
+  # Smoke Tests - Run after API tests pass
+  smoke-tests:
+    needs: api-tests
+    if: needs.api-tests.outputs.success == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    outputs:
+      success: ${{ steps.run-tests.outputs.success }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Cypress
+        run: |
+          cd "Automation Framework"
+          npm install --no-audit --no-fund --prefer-offline --legacy-peer-deps
+          npm run cy:verify
+        env:
+          NODE_ENV: development
+
+      - name: Run Smoke Tests
+        id: run-tests
+        run: |
+          cd "Automation Framework"
+          npx cypress run --env grepTags=@Smoke,grepFilterSpecs=true
+        env:
+          CI: true
+          CYPRESS_BASE_URL: ${{ env.FRONTEND_URL }}
+          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}
+          CYPRESS_TODO_APP_URL: ${{ env.FRONTEND_URL }}
+
+      - name: Upload Smoke test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Smoke-Test-Report
+          path: Automation Framework/cypress/reports/html
+
+      - name: Upload Smoke screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Smoke-Screenshots
+          path: Automation Framework/cypress/screenshots
+
+      - name: Upload Smoke videos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Smoke-Videos
+          path: Automation Framework/cypress/videos
+
+  # Regression Tests - Run after smoke tests pass
+  regression-tests:
+    needs: smoke-tests
+    if: needs.smoke-tests.outputs.success == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    outputs:
+      success: ${{ steps.run-tests.outputs.success }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Cypress
+        run: |
+          cd "Automation Framework"
+          npm install --no-audit --no-fund --prefer-offline --legacy-peer-deps
+          npm run cy:verify
+        env:
+          NODE_ENV: development
+
+      - name: Run Regression Tests
+        id: run-tests
+        run: |
+          cd "Automation Framework"
+          npx cypress run --env grepTags=@Regression,grepFilterSpecs=true
+        env:
+          CI: true
+          CYPRESS_BASE_URL: ${{ env.FRONTEND_URL }}
+          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}
+          CYPRESS_TODO_APP_URL: ${{ env.FRONTEND_URL }}
+
+      - name: Upload Regression test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Regression-Test-Report
+          path: Automation Framework/cypress/reports/html
+
+      - name: Upload Regression screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Regression-Screenshots
+          path: Automation Framework/cypress/screenshots
+
+      - name: Upload Regression videos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Regression-Videos
+          path: Automation Framework/cypress/videos
+
+  # Merge Reports - Run after all tests complete
+  merge-reports:
+    needs: [api-tests, smoke-tests, regression-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all test reports
+        uses: actions/download-artifact@v4
+        with:
+          path: reports
+
+      - name: Merge and create combined report
+        run: |
+          echo "Creating combined test report..."
+          
+          # Create combined report directory
+          mkdir -p combined-report
+          
+          # Copy all reports to combined directory
+          if [ -d "reports/API-Test-Report" ]; then
+            cp -r reports/API-Test-Report/* combined-report/
+            echo "✅ API tests completed"
+          else
+            echo "❌ API tests failed or were not run"
+          fi
+          
+          if [ -d "reports/Smoke-Test-Report" ]; then
+            cp -r reports/Smoke-Test-Report/* combined-report/
+            echo "✅ Smoke tests completed"
+          else
+            echo "❌ Smoke tests failed or were not run"
+          fi
+          
+          if [ -d "reports/Regression-Test-Report" ]; then
+            cp -r reports/Regression-Test-Report/* combined-report/
+            echo "✅ Regression tests completed"
+          else
+            echo "❌ Regression tests failed or were not run"
+          fi
+          
+          # Create summary file
+          cat > combined-report/test-summary.md << EOF
+          # Test Execution Summary
+          
+          ## Test Results
+          - API Tests: ${{ needs.api-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }}
+          - Smoke Tests: ${{ needs.smoke-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }}
+          - Regression Tests: ${{ needs.regression-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }}
+          
+          ## Execution Order
+          1. Setup servers (Backend: ${{ env.BACKEND_PORT }}, Frontend: ${{ env.FRONTEND_PORT }})
+          2. API Tests (Backend validation)
+          3. Smoke Tests (Core functionality)
+          4. Regression Tests (Full feature set)
+          
+          ## Combined Report
+          This report contains results from all test suites executed in this workflow run.
+          EOF
+          
+          echo "📊 Combined report created successfully!"
+
+      - name: Upload combined report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Combined-Test-Report
+          path: combined-report
+
+      - name: Upload all screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: All-Screenshots
+          path: reports/*-Screenshots
+
+      - name: Upload all videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: All-Videos
+          path: reports/*-Videos 
