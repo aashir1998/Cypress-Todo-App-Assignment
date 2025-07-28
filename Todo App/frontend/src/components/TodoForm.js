@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FiPlus } from 'react-icons/fi';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { FiPlus } from "react-icons/fi";
 
 const TodoForm = ({ onSubmit, isLoading = false }) => {
-  const [title, setTitle] = useState('');
-  const [error, setError] = useState('');
+  const [title, setTitle] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -12,18 +12,18 @@ const TodoForm = ({ onSubmit, isLoading = false }) => {
     const trimmedTitle = title.trim();
 
     if (!trimmedTitle) {
-      setError('Please enter a todo title');
+      setError("Please enter a todo title");
       return;
     }
 
     if (trimmedTitle.length > 500) {
-      setError('Todo title must be less than 500 characters');
+      setError("Todo title must be less than 500 characters");
       return;
     }
 
-    setError('');
+    setError("");
     onSubmit(trimmedTitle);
-    setTitle('');
+    setTitle("");
   };
 
   const handleChange = (e) => {
@@ -32,12 +32,12 @@ const TodoForm = ({ onSubmit, isLoading = false }) => {
 
     // Clear error when user starts typing
     if (error && value.trim()) {
-      setError('');
+      setError("");
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
     }
@@ -64,7 +64,7 @@ const TodoForm = ({ onSubmit, isLoading = false }) => {
               onChange={handleChange}
               onKeyPress={handleKeyPress}
               placeholder="What needs to be done?"
-              className={`input ${error ? 'input-error' : ''}`}
+              className={`input ${error ? "input-error" : ""}`}
               disabled={isLoading}
               maxLength={500}
               aria-label="Todo title"

@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate
-} from 'react-router-dom';
-import { motion } from 'framer-motion';
-import TodoApp from './components/TodoApp';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import Login from './components/Login';
-import './App.css';
+  Navigate,
+} from "react-router-dom";
+import { motion } from "framer-motion";
+import TodoApp from "./components/TodoApp";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import Login from "./components/Login";
+import "./App.css";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -18,16 +18,16 @@ function App() {
 
   useEffect(() => {
     // Check if user is authenticated on app load
-    const isAuthenticated = localStorage.getItem('isAuthenticated');
-    const userData = localStorage.getItem('user');
+    const isAuthenticated = localStorage.getItem("isAuthenticated");
+    const userData = localStorage.getItem("user");
 
-    if (isAuthenticated === 'true' && userData) {
+    if (isAuthenticated === "true" && userData) {
       try {
         setUser(JSON.parse(userData));
       } catch (error) {
-        console.error('Error parsing user data:', error);
-        localStorage.removeItem('isAuthenticated');
-        localStorage.removeItem('user');
+        console.error("Error parsing user data:", error);
+        localStorage.removeItem("isAuthenticated");
+        localStorage.removeItem("user");
       }
     }
     setIsLoading(false);

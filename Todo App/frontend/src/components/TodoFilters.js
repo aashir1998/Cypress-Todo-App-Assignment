@@ -1,18 +1,18 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FiFilter, FiTrash2 } from 'react-icons/fi';
+import React from "react";
+import { motion } from "framer-motion";
+import { FiFilter, FiTrash2 } from "react-icons/fi";
 
 const TodoFilters = ({
   filter,
   onFilterChange,
   hasCompletedTodos,
   onClearCompleted,
-  isLoading
+  isLoading,
 }) => {
   const filters = [
-    { id: 'all', label: 'All' },
-    { id: 'active', label: 'Active' },
-    { id: 'completed', label: 'Completed' }
+    { id: "all", label: "All" },
+    { id: "active", label: "Active" },
+    { id: "completed", label: "Completed" },
   ];
 
   return (
@@ -31,8 +31,8 @@ const TodoFilters = ({
                 onClick={() => onFilterChange(filterOption.id)}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
                   filter === filterOption.id
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
                 }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -56,7 +56,7 @@ const TodoFilters = ({
           >
             <FiTrash2 className="w-4 h-4" />
             <span className="text-sm font-medium">
-              {isLoading ? 'Clearing...' : 'Clear Completed'}
+              {isLoading ? "Clearing..." : "Clear Completed"}
             </span>
           </motion.button>
         )}

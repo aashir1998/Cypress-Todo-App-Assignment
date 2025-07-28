@@ -1,42 +1,42 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React from "react";
+import { motion } from "framer-motion";
 import {
   FiCheckCircle,
   FiClock,
   FiTrendingUp,
-  FiBarChart
-} from 'react-icons/fi';
+  FiBarChart,
+} from "react-icons/fi";
 
 const TodoStats = ({ stats }) => {
   const statItems = [
     {
-      label: 'Total',
+      label: "Total",
       value: stats.total,
       icon: FiBarChart,
-      color: 'bg-blue-500',
-      textColor: 'text-blue-600'
+      color: "bg-blue-500",
+      textColor: "text-blue-600",
     },
     {
-      label: 'Completed',
+      label: "Completed",
       value: stats.completed,
       icon: FiCheckCircle,
-      color: 'bg-green-500',
-      textColor: 'text-green-600'
+      color: "bg-green-500",
+      textColor: "text-green-600",
     },
     {
-      label: 'Active',
+      label: "Active",
       value: stats.active,
       icon: FiClock,
-      color: 'bg-yellow-500',
-      textColor: 'text-yellow-600'
+      color: "bg-yellow-500",
+      textColor: "text-yellow-600",
     },
     {
-      label: 'Completion Rate',
+      label: "Completion Rate",
       value: `${stats.completionRate}%`,
       icon: FiTrendingUp,
-      color: 'bg-purple-500',
-      textColor: 'text-purple-600'
-    }
+      color: "bg-purple-500",
+      textColor: "text-purple-600",
+    },
   ];
 
   return (
@@ -54,7 +54,7 @@ const TodoStats = ({ stats }) => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, delay: index * 0.1 }}
           className="card p-4 text-center"
-          data-automation-id={`stat-${item.label.toLowerCase().replace(' ', '-')}`}
+          data-automation-id={`stat-${item.label.toLowerCase().replace(" ", "-")}`}
         >
           <div className="flex items-center justify-center mb-2">
             <div className={`p-2 rounded-full ${item.color} text-white`}>

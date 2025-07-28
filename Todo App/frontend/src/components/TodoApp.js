@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import toast from 'react-hot-toast';
-import TodoForm from './TodoForm';
-import TodoList from './TodoList';
-import TodoFilters from './TodoFilters';
-import TodoStats from './TodoStats';
-import SearchBar from './SearchBar';
-import { todoApi } from '../services/todoApi';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "react-query";
+import toast from "react-hot-toast";
+import TodoForm from "./TodoForm";
+import TodoList from "./TodoList";
+import TodoFilters from "./TodoFilters";
+import TodoStats from "./TodoStats";
+import SearchBar from "./SearchBar";
+import { todoApi } from "../services/todoApi";
 
 const TodoApp = () => {
-  const [filter, setFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const queryClient = useQueryClient();
 
   // Fetch todos
@@ -19,90 +19,90 @@ const TodoApp = () => {
     data: todos = [],
     isLoading,
     error,
-    refetch
-  } = useQuery(['todos', filter, searchTerm], () =>
+    refetch,
+  } = useQuery(["todos", filter, searchTerm], () =>
     todoApi.getTodos({
-      completed: filter !== 'all' ? filter === 'completed' : undefined,
-      search: searchTerm
-    })
+      completed: filter !== "all" ? filter === "completed" : undefined,
+      search: searchTerm,
+    }),
   );
 
   // Fetch stats
-  const { data: stats } = useQuery('stats', todoApi.getStats);
+  const { data: stats } = useQuery("stats", todoApi.getStats);
 
   // Mutations
   const createTodoMutation = useMutation(todoApi.createTodo, {
     onSuccess: () => {
-      queryClient.invalidateQueries('todos');
-      queryClient.invalidateQueries('stats');
-      toast.success('Todo created successfully!');
+      queryClient.invalidateQueries("todos");
+      queryClient.invalidateQueries("stats");
+      toast.success("Todo created successfully!");
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to create todo');
-    }
+      toast.error(error.response?.data?.message || "Failed to create todo");
+    },
   });
 
   const updateTodoMutation = useMutation(
     ({ id, updates }) => todoApi.updateTodo(id, updates),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries('todos');
-        queryClient.invalidateQueries('stats');
-        toast.success('Todo updated successfully!');
+        queryClient.invalidateQueries("todos");
+        queryClient.invalidateQueries("stats");
+        toast.success("Todo updated successfully!");
       },
       onError: (error) => {
-        toast.error(error.response?.data?.message || 'Failed to update todo');
-      }
-    }
+        toast.error(error.response?.data?.message || "Failed to update todo");
+      },
+    },
   );
 
   const patchTodoMutation = useMutation(
     ({ id, updates }) => todoApi.patchTodo(id, updates),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries('todos');
-        queryClient.invalidateQueries('stats');
-        toast.success('Todo updated successfully!');
+        queryClient.invalidateQueries("todos");
+        queryClient.invalidateQueries("stats");
+        toast.success("Todo updated successfully!");
       },
       onError: (error) => {
-        toast.error(error.response?.data?.message || 'Failed to update todo');
-      }
-    }
+        toast.error(error.response?.data?.message || "Failed to update todo");
+      },
+    },
   );
 
   const deleteTodoMutation = useMutation(todoApi.deleteTodo, {
     onSuccess: () => {
-      queryClient.invalidateQueries('todos');
-      queryClient.invalidateQueries('stats');
-      toast.success('Todo deleted successfully!');
+      queryClient.invalidateQueries("todos");
+      queryClient.invalidateQueries("stats");
+      toast.success("Todo deleted successfully!");
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to delete todo');
-    }
+      toast.error(error.response?.data?.message || "Failed to delete todo");
+    },
   });
 
   const toggleAllMutation = useMutation(todoApi.toggleAllTodos, {
     onSuccess: () => {
-      queryClient.invalidateQueries('todos');
-      queryClient.invalidateQueries('stats');
-      toast.success('All todos updated!');
+      queryClient.invalidateQueries("todos");
+      queryClient.invalidateQueries("stats");
+      toast.success("All todos updated!");
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to update todos');
-    }
+      toast.error(error.response?.data?.message || "Failed to update todos");
+    },
   });
 
   const clearCompletedMutation = useMutation(todoApi.clearCompleted, {
     onSuccess: () => {
-      queryClient.invalidateQueries('todos');
-      queryClient.invalidateQueries('stats');
-      toast.success('Completed todos cleared!');
+      queryClient.invalidateQueries("todos");
+      queryClient.invalidateQueries("stats");
+      toast.success("Completed todos cleared!");
     },
     onError: (error) => {
       toast.error(
-        error.response?.data?.message || 'Failed to clear completed todos'
+        error.response?.data?.message || "Failed to clear completed todos",
       );
-    }
+    },
   });
 
   // Handlers
@@ -140,7 +140,7 @@ const TodoApp = () => {
   };
 
   const handleClearSearch = () => {
-    setSearchTerm('');
+    setSearchTerm("");
   };
 
   // Error handling
@@ -272,7 +272,7 @@ const TodoApp = () => {
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center space-x-4">
                     <span className="text-sm text-gray-600">
-                      {activeTodos.length} active, {completedTodos.length}{' '}
+                      {activeTodos.length} active, {completedTodos.length}{" "}
                       completed
                     </span>
                   </div>
@@ -284,8 +284,8 @@ const TodoApp = () => {
                       data-automation-id="complete-all-button"
                     >
                       {toggleAllMutation.isLoading
-                        ? 'Updating...'
-                        : 'Complete All'}
+                        ? "Updating..."
+                        : "Complete All"}
                     </button>
                     <button
                       onClick={() => handleToggleAll(false)}
@@ -294,8 +294,8 @@ const TodoApp = () => {
                       data-automation-id="uncomplete-all-button"
                     >
                       {toggleAllMutation.isLoading
-                        ? 'Updating...'
-                        : 'Uncomplete All'}
+                        ? "Updating..."
+                        : "Uncomplete All"}
                     </button>
                   </div>
                 </div>
@@ -330,7 +330,7 @@ const TodoApp = () => {
               <p className="text-gray-600 mb-4">
                 {searchTerm
                   ? `No todos found matching "${searchTerm}"`
-                  : 'Get started by creating your first todo'}
+                  : "Get started by creating your first todo"}
               </p>
               {searchTerm && (
                 <button

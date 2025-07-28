@@ -11,13 +11,13 @@ module.exports = defineConfig({
   responseTimeout: 120000,
   viewportWidth: 1920,
   viewportHeight: 1080,
-  numTestsKeptInMemory: 3,
+  numTestsKeptInMemory: 1,
 
   env: {
     todoApiUrl: process.env.CYPRESS_TODO_API_URL,
     todoAppUrl: process.env.CYPRESS_TODO_APP_URL,
     grepFilterSpecs: true,
-    grepOmitFiltered: true,
+    grepOmitFiltered: true
   },
 
   e2e: {

@@ -1,0 +1,103 @@
+name: Cypress UI And API Sequential Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  NODE_VERSION: "18"
+  BACKEND_PORT: "3001"
+  FRONTEND_PORT: "3000"
+  BACKEND_URL: "http://localhost:3001"
+  FRONTEND_URL: "http://localhost:3000"
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v4
+
+      # Setup Node
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Install dependencies once
+      - name: Install dependencies (Root + FE + BE + Cypress)
+        run: |
+          rm -rf node_modules "Todo App/frontend/node_modules" "Todo App/backend/node_modules" "Automation Framework/node_modules"
+          npm cache clean --force
+
+          npm install --legacy-peer-deps --no-audit --no-fund
+
+          cd "Todo App/frontend"
+          npm install --legacy-peer-deps --no-audit --no-fund
+
+          cd ../backend
+          npm install --legacy-peer-deps --no-audit --no-fund
+
+          cd "../../Automation Framework"
+          npm install --legacy-peer-deps --no-audit --no-fund
+          npm run cy:verify
+
+      # Start backend
+      - name: Start Backend
+        run: |
+          cd "Todo App/backend"
+          PORT=${{ env.BACKEND_PORT }} npm start &
+          timeout 90 bash -c 'until curl -sf ${{ env.BACKEND_URL }}/health; do sleep 3; done'
+          echo "Backend ready!"
+
+      # Start frontend
+      - name: Start Frontend
+        run: |
+          cd "Todo App/frontend"
+          sed -i 's|"proxy": "http://localhost:3001"|"proxy": "${{ env.BACKEND_URL }}"|' package.json
+          PORT=${{ env.FRONTEND_PORT }} REACT_APP_API_URL=${{ env.BACKEND_URL }}/api BROWSER=none npm start &
+          timeout 90 bash -c 'until curl -sf ${{ env.FRONTEND_URL }}; do sleep 3; done'
+          echo "Frontend ready!"
+
+      # Step 1: API Tests
+      - name: Run API Tests
+        id: api
+        run: |
+          cd "Automation Framework"
+          npx cypress run --env grepTags=@API,grepFilterSpecs=true
+        env:
+          CI: true
+          CYPRESS_BASE_URL: ${{ env.BACKEND_URL }}
+
+      # Step 2: Smoke Tests (only if API passed)
+      - name: Run Smoke Tests
+        if: success()  # only run if previous step succeeded
+        id: smoke
+        run: |
+          cd "Automation Framework"
+          npx cypress run --env grepTags=@Smoke,grepFilterSpecs=true
+        env:
+          CI: true
+          CYPRESS_BASE_URL: ${{ env.FRONTEND_URL }}
+
+      # Step 3: Regression Tests (only if Smoke passed)
+      - name: Run Regression Tests
+        if: success()  # only run if smoke succeeded
+        run: |
+          cd "Automation Framework"
+          npx cypress run --env grepTags=@Regression,grepFilterSpecs=true
+        env:
+          CI: true
+          CYPRESS_BASE_URL: ${{ env.FRONTEND_URL }}
+
+      # Upload reports
+      - name: Upload Cypress Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cypress-Reports
+          path: Automation Framework/cypress/reports/html

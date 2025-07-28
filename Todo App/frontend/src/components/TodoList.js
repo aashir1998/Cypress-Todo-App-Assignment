@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import TodoItem from './TodoItem';
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import TodoItem from "./TodoItem";
 
 const TodoList = ({ todos, onToggle, onUpdate, onDelete, isLoading }) => {
   if (isLoading) {

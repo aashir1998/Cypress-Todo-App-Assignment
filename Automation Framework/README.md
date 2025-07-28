@@ -25,23 +25,28 @@ Automation Framework/
 ## 🧪 Test Structure
 
 ### Login Tests (`cypress/e2e/login/`)
+
 - **`login-with-valid-user.cy.js`** - Tests for successful login scenarios
 - **`login-with-invalid-user.cy.js`** - Tests for failed login scenarios
 
 ### UI Tests (`cypress/e2e/ui/`)
+
 - **`todo-app-ui.cy.js`** - Comprehensive UI tests for the Todo application
 
 ### Support Files (`cypress/support/`)
+
 - **`Login.js`** - Page Object Model for login functionality
 - **`commands.js`** - Custom Cypress commands
 - **`e2e.js`** - Cypress support configuration
 
 ### Test Data (`cypress/fixtures/`)
+
 - **`testData.json`** - Test data for login scenarios
 
 ## 🚀 Running Tests
 
 ### From Root Directory
+
 ```bash
 # Run all tests
 npm run test:all
@@ -56,6 +61,7 @@ npm run ui:tests
 ```
 
 ### From Automation Framework Directory
+
 ```bash
 cd "Automation Framework"
 
@@ -73,6 +79,7 @@ cypress run --spec "cypress/e2e/ui/**/*.cy.js"
 ## 🎯 Test Features
 
 ### Login Testing
+
 - ✅ Valid user login scenarios
 - ✅ Invalid user login scenarios
 - ✅ Form validation testing
@@ -81,6 +88,7 @@ cypress run --spec "cypress/e2e/ui/**/*.cy.js"
 - ✅ Form state management
 
 ### UI Testing
+
 - ✅ Todo creation, editing, deletion
 - ✅ Todo completion and filtering
 - ✅ Search functionality
@@ -89,6 +97,7 @@ cypress run --spec "cypress/e2e/ui/**/*.cy.js"
 - ✅ Responsive design testing
 
 ### Framework Features
+
 - ✅ Page Object Model implementation
 - ✅ Custom Cypress commands
 - ✅ Data-driven testing
@@ -100,6 +109,7 @@ cypress run --spec "cypress/e2e/ui/**/*.cy.js"
 ## 🔧 Configuration
 
 ### Cypress Configuration (`cypress.config.js`)
+
 - Custom viewport settings
 - Timeout configurations
 - Reporter settings
@@ -107,17 +117,20 @@ cypress run --spec "cypress/e2e/ui/**/*.cy.js"
 - Test retry logic
 
 ### ESLint Configuration (`eslint.config.js`)
+
 - Code quality rules
 - Cypress-specific linting
 - Best practices enforcement
 
 ### Prettier Configuration (`.prettierrc`)
+
 - Code formatting rules
 - Consistent code style
 
 ## 📊 Test Reports
 
 Cypress generates comprehensive test reports including:
+
 - **Mochawesome Reports**: HTML-based detailed reports
 - **Screenshots**: Failed test screenshots
 - **Videos**: Test execution recordings
@@ -128,21 +141,25 @@ Reports are generated in the `cypress/reports/` directory.
 ## 🎯 Best Practices
 
 ### Page Object Model
+
 - All page interactions are abstracted into reusable classes
 - Selectors are centralized and maintainable
 - Methods are descriptive and reusable
 
 ### Test Data Management
+
 - Test data is externalized in JSON fixtures
 - Data is organized by test scenarios
 - Easy to maintain and update
 
 ### Custom Commands
+
 - Reusable commands for common operations
 - Consistent test implementation
 - Reduced code duplication
 
 ### Error Handling
+
 - Comprehensive error scenarios covered
 - Clear error messages and assertions
 - Robust test execution
@@ -150,6 +167,7 @@ Reports are generated in the `cypress/reports/` directory.
 ## 🚀 Continuous Integration
 
 The framework is designed to work seamlessly with CI/CD pipelines:
+
 - Parallel test execution support
 - Cross-browser testing
 - Multiple viewport testing
@@ -157,4 +175,4 @@ The framework is designed to work seamlessly with CI/CD pipelines:
 
 ---
 
-**Happy Testing! 🎉** 
+**Happy Testing! 🎉**

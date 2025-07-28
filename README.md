@@ -5,6 +5,7 @@ A comprehensive **automation testing framework** for a full-stack Todo applicati
 ## 🎯 **Project Focus: Automation Framework**
 
 This project is primarily designed as a **complete automation testing framework** that demonstrates:
+
 - **End-to-End Testing** with Cypress
 - **API Testing** for REST endpoints
 - **UI Testing** for React components
@@ -37,10 +38,12 @@ This project is primarily designed as a **complete automation testing framework*
 ## 🚀 **Quick Start**
 
 ### Prerequisites
+
 - Node.js >= 16.0.0
 - npm >= 8.0.0
 
 ### Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/aashir1998/Cypress-Todo-App-Assignment.git
@@ -51,18 +54,21 @@ npm install
 ```
 
 ### Start the Application
+
 ```bash
 # Start both frontend and backend servers
 npm start
 ```
 
 This will start:
+
 - **Frontend**: http://localhost:3000
 - **Backend**: http://localhost:3001
 
 ## 🧪 **Automation Framework Features**
 
 ### **Test Categories**
+
 - **🔐 Login Tests**: Authentication scenarios and user flows
 - **🎨 UI Tests**: Frontend component interactions and user experience
 - **🔌 API Tests**: REST API endpoint validation and data integrity
@@ -70,6 +76,7 @@ This will start:
 - **🔄 Regression Tests**: Comprehensive feature testing
 
 ### **Testing Capabilities**
+
 - **Cross-browser Testing**: Chrome, Firefox, Edge support
 - **Responsive Testing**: Mobile (375x667) and Tablet (768x1024) viewports
 - **Parallel Execution**: CI/CD optimized test runs
@@ -79,6 +86,7 @@ This will start:
 - **Reporting**: Mochawesome HTML reports with screenshots
 
 ### **Framework Architecture**
+
 - **Page Object Model**: Maintainable and reusable test structure
 - **Custom Commands**: Reusable test utilities and helpers
 - **Data Automation IDs**: Stable selectors for reliable test execution
@@ -88,6 +96,7 @@ This will start:
 ## 🛠️ **Available Scripts**
 
 ### **Application Commands**
+
 ```bash
 npm start                    # Start both frontend and backend
 npm run start:backend        # Start only the backend server
@@ -95,6 +104,7 @@ npm run start:frontend       # Start only the frontend server
 ```
 
 ### **Testing Commands**
+
 ```bash
 npm run cy:open              # Open Cypress test runner (GUI)
 npm run cy:run               # Run Cypress tests in headless mode
@@ -109,6 +119,7 @@ npm run test:parallel        # Run tests in parallel mode
 ```
 
 ### **Test Suite Commands**
+
 ```bash
 npm run e2e:smoke:tests      # Run smoke test suite
 npm run e2e:regression:tests # Run regression test suite
@@ -117,6 +128,7 @@ npm run ui:tests             # Run UI test suite only
 ```
 
 ### **Code Quality**
+
 ```bash
 npm run prettier-format      # Format code with Prettier
 npm run cy:verify            # Verify Cypress installation
@@ -125,6 +137,7 @@ npm run cy:verify            # Verify Cypress installation
 ## 📊 **Test Reports**
 
 After running tests, comprehensive reports are generated in:
+
 - **HTML Reports**: `Automation Framework/cypress/reports/`
 - **Screenshots**: `Automation Framework/cypress/screenshots/`
 - **Videos**: `Automation Framework/cypress/videos/`
@@ -134,6 +147,7 @@ After running tests, comprehensive reports are generated in:
 The Todo App serves as a testing target and includes:
 
 ### **Frontend (React)**
+
 - Modern UI with Tailwind CSS and Framer Motion
 - Real-time search and filtering
 - Responsive design for all devices
@@ -142,6 +156,7 @@ The Todo App serves as a testing target and includes:
 - Statistics dashboard
 
 ### **Backend (Node.js)**
+
 - RESTful API with Express.js
 - Security middleware (Helmet, CORS, Rate Limiting)
 - Input validation and error handling
@@ -151,6 +166,7 @@ The Todo App serves as a testing target and includes:
 ## 🔧 **Framework Configuration**
 
 ### **Cypress Configuration**
+
 - **Base URL**: http://localhost:3000
 - **API Base URL**: http://localhost:3001/api
 - **Viewport**: Responsive testing support
@@ -158,6 +174,7 @@ The Todo App serves as a testing target and includes:
 - **Retries**: Automatic retry on flaky tests
 
 ### **Environment Variables**
+
 ```bash
 # Create .env file in Automation Framework/
 CYPRESS_BASE_URL=http://localhost:3000
@@ -169,6 +186,7 @@ CYPRESS_SCREENSHOTS=true
 ## 🚀 **CI/CD Integration**
 
 The framework is optimized for continuous integration:
+
 - **Parallel execution** support
 - **Cross-browser testing** in CI environments
 - **Video recording** for debugging

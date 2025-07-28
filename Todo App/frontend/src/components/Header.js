@@ -1,16 +1,16 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FiGithub, FiExternalLink, FiUser, FiLogOut } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { motion } from "framer-motion";
+import { FiGithub, FiExternalLink, FiUser, FiLogOut } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const Header = ({ user, onLogout }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('user');
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("user");
     onLogout();
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
@@ -73,7 +73,7 @@ const Header = ({ user, onLogout }) => {
               </>
             ) : (
               <motion.button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate("/login")}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
