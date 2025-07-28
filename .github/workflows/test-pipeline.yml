@@ -1,4 +1,4 @@
-name: Cypress E2E Sequential Tests
+name: Cypress UI And API Sequential Tests
 
 on:
   push:
