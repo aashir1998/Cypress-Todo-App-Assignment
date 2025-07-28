@@ -32,6 +32,13 @@ This framework provides comprehensive testing coverage for a Todo application in
 - **@faker-js/faker**: Dynamic test data generation
 - **cypress-plugin-api**: Enhanced API testing capabilities
 
+## 📋 **Test Plan**
+
+For detailed test planning and strategy documentation, please refer to my comprehensive test plan:
+
+**[📄 Complete Test Plan Documentation](https://docs.google.com/document/d/12LPTQHIjd_M_Tqf4R7SxYhU4StdRD1C3Ns7RJ3K_Qzc/edit?tab=t.0)**
+
+
 
 ## 🏗️ **Project Structure**
 
