@@ -14,7 +14,7 @@ describe('Login API', { tags: '@API' }, () => {
   it('authenticates valid user', () => {
     cy.api({
       method: 'GET',
-      url: `${Cypress.env('todoApiUrl') || 'http://localhost:3001/api'}/stats`,
+      url: `${Cypress.env('todoApiUrl')}/stats`,
       failOnStatusCode: false
     }).then((res) => {
       cy.assertSuccessResponse(res);
@@ -27,7 +27,7 @@ describe('Login API', { tags: '@API' }, () => {
   it('fails with invalid email format', () => {
     cy.api({
       method: 'GET',
-      url: `${Cypress.env('todoApiUrl') || 'http://localhost:3001/api'}/non-existent`,
+      url: `${Cypress.env('todoApiUrl')}/non-existent`,
       failOnStatusCode: false
     }).then((res) => {
       cy.assertNotFoundError(res);

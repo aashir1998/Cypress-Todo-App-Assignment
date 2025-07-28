@@ -58,7 +58,7 @@ jobs:
       - name: Start Frontend
         run: |
           cd "Todo App/frontend"
-          sed -i 's|"proxy": "http://localhost:3001"|"proxy": "${{ env.BACKEND_URL }}"|' package.json
+          sed -i 's|"proxy": ".*"|"proxy": "${{ env.BACKEND_URL }}"|' package.json
           PORT=${{ env.FRONTEND_PORT }} REACT_APP_API_URL=${{ env.BACKEND_URL }}/api BROWSER=none npm start &
           timeout 90 bash -c 'until curl -sf ${{ env.FRONTEND_URL }}; do sleep 3; done'
           echo "Frontend ready!"
@@ -72,6 +72,8 @@ jobs:
         env:
           CI: true
           CYPRESS_BASE_URL: ${{ env.BACKEND_URL }}
+          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}/api
+          CYPRESS_TODO_APP_URL: ${{ env.FRONTEND_URL }}
 
       # Step 2: Smoke Tests (only if API passed)
       - name: Run Smoke Tests
@@ -83,6 +85,8 @@ jobs:
         env:
           CI: true
           CYPRESS_BASE_URL: ${{ env.FRONTEND_URL }}
+          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}/api
+          CYPRESS_TODO_APP_URL: ${{ env.FRONTEND_URL }}
 
       # Step 3: Regression Tests (only if Smoke passed)
       - name: Run Regression Tests
@@ -93,6 +97,8 @@ jobs:
         env:
           CI: true
           CYPRESS_BASE_URL: ${{ env.FRONTEND_URL }}
+          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}/api
+          CYPRESS_TODO_APP_URL: ${{ env.FRONTEND_URL }}
 
       # Upload reports
       - name: Upload Cypress Reports
