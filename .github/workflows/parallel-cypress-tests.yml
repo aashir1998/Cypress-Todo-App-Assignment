@@ -1,4 +1,4 @@
-name: Sequential Cypress E2E Tests
+name: Cypress E2E Sequential Tests
 
 on:
   push:
@@ -14,367 +14,90 @@ env:
   FRONTEND_URL: "http://localhost:3000"
 
 jobs:
-  # Setup environment and prepare dependencies
-  setup-environment:
+  e2e-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      ready: ${{ steps.verify-setup.outputs.ready }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    timeout-minutes: 25
 
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v4
+
+      # Setup Node
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      # Clean up and install dependencies
-      - name: Setup environment
+      # Install dependencies once
+      - name: Install dependencies (Root + FE + BE + Cypress)
         run: |
-          rm -rf node_modules
-          rm -rf "Todo App/frontend/node_modules"
-          rm -rf "Todo App/backend/node_modules"
-          rm -rf "Automation Framework/node_modules"
+          rm -rf node_modules "Todo App/frontend/node_modules" "Todo App/backend/node_modules" "Automation Framework/node_modules"
           npm cache clean --force
-          rm -rf /home/runner/.npm/_cacache
-          rm -rf /home/runner/.npm/_logs
 
-      - name: Install dependencies
-        run: |
-          npm install --no-audit --no-fund --prefer-offline --legacy-peer-deps
-          cd "Todo App/frontend" && npm install --no-audit --no-fund --prefer-offline --legacy-peer-deps
-          cd "../backend" && npm install --no-audit --no-fund --prefer-offline --legacy-peer-deps
-        env:
-          NODE_ENV: development
+          npm install --legacy-peer-deps --no-audit --no-fund
 
-      - name: Install Cypress
-        run: npm run cy:verify
-        env:
-          NODE_ENV: development
+          cd "Todo App/frontend"
+          npm install --legacy-peer-deps --no-audit --no-fund
 
-      - name: Verify setup
-        id: verify-setup
-        run: |
-          echo "Environment setup completed successfully!"
-          echo "ready=true" >> $GITHUB_OUTPUT
+          cd ../backend
+          npm install --legacy-peer-deps --no-audit --no-fund
 
-  # API Tests - Run first after environment setup
-  api-tests:
-    needs: setup-environment
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    outputs:
-      success: ${{ steps.run-tests.outputs.success }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install Cypress
-        run: |
-          cd "Automation Framework"
-          npm install --no-audit --no-fund --prefer-offline --legacy-peer-deps
+          cd "../../Automation Framework"
+          npm install --legacy-peer-deps --no-audit --no-fund
           npm run cy:verify
-        env:
-          NODE_ENV: development
 
-      # Start backend server for API tests
-      - name: Start backend server
+      # Start backend
+      - name: Start Backend
         run: |
           cd "Todo App/backend"
           PORT=${{ env.BACKEND_PORT }} npm start &
-          echo "Backend server starting on port ${{ env.BACKEND_PORT }}..."
-          timeout 60 bash -c 'until curl -f ${{ env.BACKEND_URL }}/health; do sleep 2; done'
-          echo "Backend server is ready!"
-        env:
-          NODE_ENV: development
-          CI: true
+          timeout 90 bash -c 'until curl -sf ${{ env.BACKEND_URL }}/health; do sleep 3; done'
+          echo "Backend ready!"
 
+      # Start frontend
+      - name: Start Frontend
+        run: |
+          cd "Todo App/frontend"
+          sed -i 's|"proxy": "http://localhost:3001"|"proxy": "${{ env.BACKEND_URL }}"|' package.json
+          PORT=${{ env.FRONTEND_PORT }} REACT_APP_API_URL=${{ env.BACKEND_URL }}/api BROWSER=none npm start &
+          timeout 90 bash -c 'until curl -sf ${{ env.FRONTEND_URL }}; do sleep 3; done'
+          echo "Frontend ready!"
+
+      # Step 1: API Tests
       - name: Run API Tests
-        id: run-tests
+        id: api
         run: |
           cd "Automation Framework"
           npx cypress run --env grepTags=@API,grepFilterSpecs=true
         env:
           CI: true
           CYPRESS_BASE_URL: ${{ env.BACKEND_URL }}
-          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}
-          CYPRESS_TODO_APP_URL: ${{ env.BACKEND_URL }}
 
-      - name: Upload API test report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: API-Test-Report
-          path: Automation Framework/cypress/reports/html
-
-      - name: Upload API screenshots
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: API-Screenshots
-          path: Automation Framework/cypress/screenshots
-
-      - name: Upload API videos
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: API-Videos
-          path: Automation Framework/cypress/videos
-
-  # Smoke Tests - Run after API tests pass
-  smoke-tests:
-    needs: api-tests
-    if: needs.api-tests.outputs.success == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    outputs:
-      success: ${{ steps.run-tests.outputs.success }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install Cypress
-        run: |
-          cd "Automation Framework"
-          npm install --no-audit --no-fund --prefer-offline --legacy-peer-deps
-          npm run cy:verify
-        env:
-          NODE_ENV: development
-
-      # Start backend server for smoke tests
-      - name: Start backend server
-        run: |
-          cd "Todo App/backend"
-          PORT=${{ env.BACKEND_PORT }} npm start &
-          echo "Backend server starting on port ${{ env.BACKEND_PORT }}..."
-          timeout 60 bash -c 'until curl -f ${{ env.BACKEND_URL }}/health; do sleep 2; done'
-          echo "Backend server is ready!"
-        env:
-          NODE_ENV: development
-          CI: true
-
-      # Start frontend server for smoke tests
-      - name: Start frontend server
-        run: |
-          cd "Todo App/frontend"
-          # Update proxy to match backend port
-          sed -i 's|"proxy": "http://localhost:3001"|"proxy": "${{ env.BACKEND_URL }}"|' package.json
-          PORT=${{ env.FRONTEND_PORT }} REACT_APP_API_URL=${{ env.BACKEND_URL }}/api BROWSER=none npm start &
-          echo "Frontend server starting on port ${{ env.FRONTEND_PORT }}..."
-          timeout 60 bash -c 'until curl -f ${{ env.FRONTEND_URL }}; do sleep 2; done'
-          echo "Frontend server is ready!"
-        env:
-          REACT_APP_API_URL: ${{ env.BACKEND_URL }}
-          NODE_ENV: development
-          CI: true
-
+      # Step 2: Smoke Tests (only if API passed)
       - name: Run Smoke Tests
-        id: run-tests
+        if: success()  # only run if previous step succeeded
+        id: smoke
         run: |
           cd "Automation Framework"
           npx cypress run --env grepTags=@Smoke,grepFilterSpecs=true
         env:
           CI: true
           CYPRESS_BASE_URL: ${{ env.FRONTEND_URL }}
-          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}
-          CYPRESS_TODO_APP_URL: ${{ env.FRONTEND_URL }}
 
-      - name: Upload Smoke test report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Smoke-Test-Report
-          path: Automation Framework/cypress/reports/html
-
-      - name: Upload Smoke screenshots
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Smoke-Screenshots
-          path: Automation Framework/cypress/screenshots
-
-      - name: Upload Smoke videos
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Smoke-Videos
-          path: Automation Framework/cypress/videos
-
-  # Regression Tests - Run after smoke tests pass
-  regression-tests:
-    needs: smoke-tests
-    if: needs.smoke-tests.outputs.success == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 12
-    outputs:
-      success: ${{ steps.run-tests.outputs.success }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install Cypress
-        run: |
-          cd "Automation Framework"
-          npm install --no-audit --no-fund --prefer-offline --legacy-peer-deps
-          npm run cy:verify
-        env:
-          NODE_ENV: development
-
-      # Start backend server for regression tests
-      - name: Start backend server
-        run: |
-          cd "Todo App/backend"
-          PORT=${{ env.BACKEND_PORT }} npm start &
-          echo "Backend server starting on port ${{ env.BACKEND_PORT }}..."
-          timeout 60 bash -c 'until curl -f ${{ env.BACKEND_URL }}/health; do sleep 2; done'
-          echo "Backend server is ready!"
-        env:
-          NODE_ENV: development
-          CI: true
-
-      # Start frontend server for regression tests
-      - name: Start frontend server
-        run: |
-          cd "Todo App/frontend"
-          # Update proxy to match backend port
-          sed -i 's|"proxy": "http://localhost:3001"|"proxy": "${{ env.BACKEND_URL }}"|' package.json
-          PORT=${{ env.FRONTEND_PORT }} REACT_APP_API_URL=${{ env.BACKEND_URL }}/api BROWSER=none npm start &
-          echo "Frontend server starting on port ${{ env.FRONTEND_PORT }}..."
-          timeout 60 bash -c 'until curl -f ${{ env.FRONTEND_URL }}; do sleep 2; done'
-          echo "Frontend server is ready!"
-        env:
-          REACT_APP_API_URL: ${{ env.BACKEND_URL }}
-          NODE_ENV: development
-          CI: true
-
+      # Step 3: Regression Tests (only if Smoke passed)
       - name: Run Regression Tests
-        id: run-tests
+        if: success()  # only run if smoke succeeded
         run: |
           cd "Automation Framework"
           npx cypress run --env grepTags=@Regression,grepFilterSpecs=true
         env:
           CI: true
           CYPRESS_BASE_URL: ${{ env.FRONTEND_URL }}
-          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}
-          CYPRESS_TODO_APP_URL: ${{ env.FRONTEND_URL }}
 
-      - name: Upload Regression test report
+      # Upload reports
+      - name: Upload Cypress Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Regression-Test-Report
+          name: Cypress-Reports
           path: Automation Framework/cypress/reports/html
-
-      - name: Upload Regression screenshots
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Regression-Screenshots
-          path: Automation Framework/cypress/screenshots
-
-      - name: Upload Regression videos
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Regression-Videos
-          path: Automation Framework/cypress/videos
-
-  # Merge Reports - Run after all tests complete
-  merge-reports:
-    needs: [api-tests, smoke-tests, regression-tests]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download all test reports
-        uses: actions/download-artifact@v4
-        with:
-          path: reports
-
-      - name: Merge and create combined report
-        run: |
-          echo "Creating combined test report..."
-          
-          # Create combined report directory
-          mkdir -p combined-report
-          
-          # Copy all reports to combined directory
-          if [ -d "reports/API-Test-Report" ]; then
-            cp -r reports/API-Test-Report/* combined-report/
-            echo "✅ API tests completed"
-          else
-            echo "❌ API tests failed or were not run"
-          fi
-          
-          if [ -d "reports/Smoke-Test-Report" ]; then
-            cp -r reports/Smoke-Test-Report/* combined-report/
-            echo "✅ Smoke tests completed"
-          else
-            echo "❌ Smoke tests failed or were not run"
-          fi
-          
-          if [ -d "reports/Regression-Test-Report" ]; then
-            cp -r reports/Regression-Test-Report/* combined-report/
-            echo "✅ Regression tests completed"
-          else
-            echo "❌ Regression tests failed or were not run"
-          fi
-          
-          # Create summary file
-          cat > combined-report/test-summary.md << EOF
-          # Test Execution Summary
-          
-          ## Test Results
-          - API Tests: ${{ needs.api-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }}
-          - Smoke Tests: ${{ needs.smoke-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }}
-          - Regression Tests: ${{ needs.regression-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }}
-          
-          ## Execution Order
-          1. Setup environment
-          2. API Tests (Backend validation)
-          3. Smoke Tests (Core functionality)
-          4. Regression Tests (Full feature set)
-          
-          ## Combined Report
-          This report contains results from all test suites executed in this workflow run.
-          EOF
-          
-          echo "📊 Combined report created successfully!"
-
-      - name: Upload combined report
-        uses: actions/upload-artifact@v4
-        with:
-          name: Combined-Test-Report
-          path: combined-report
-
-      - name: Upload all screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: All-Screenshots
-          path: reports/*-Screenshots
-
-      - name: Upload all videos
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: All-Videos
-          path: reports/*-Videos 
