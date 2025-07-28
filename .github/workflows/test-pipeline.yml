@@ -33,93 +33,42 @@ jobs:
         run: |
           rm -rf node_modules "Todo App/frontend/node_modules" "Todo App/backend/node_modules" "Automation Framework/node_modules"
           npm cache clean --force
+          npm run install:all
 
-          npm install --legacy-peer-deps --no-audit --no-fund
-
-          cd "Todo App/frontend"
-          npm install --legacy-peer-deps --no-audit --no-fund
-
-          cd ../backend
-          npm install --legacy-peer-deps --no-audit --no-fund
-
-          cd "../../Automation Framework"
-          npm install --legacy-peer-deps --no-audit --no-fund
-          npm run cy:verify
-
-      # Start backend
-      - name: Start Backend
+      # Start both frontend and backend servers
+      - name: Start Application Servers
         run: |
-          cd "Todo App/backend"
-          PORT=${{ env.BACKEND_PORT }} npm start &
+          npm start &
           timeout 90 bash -c 'until curl -sf ${{ env.BACKEND_URL }}/health; do sleep 3; done'
-          echo "Backend ready!"
-
-      # Start frontend
-      - name: Start Frontend
-        run: |
-          cd "Todo App/frontend"
-          sed -i 's|"proxy": "http://localhost:3001"|"proxy": "${{ env.BACKEND_URL }}"|' package.json
-          PORT=${{ env.FRONTEND_PORT }} REACT_APP_API_URL=${{ env.BACKEND_URL }}/api BROWSER=none npm start &
           timeout 90 bash -c 'until curl -sf ${{ env.FRONTEND_URL }}; do sleep 3; done'
-          echo "Frontend ready!"
+          echo "Both servers ready!"
 
       # Step 1: API Tests
       - name: Run API Tests
         id: api
-        run: |
-          cd "Automation Framework"
-          npx cypress run --reporter mochawesome \
-            --reporter-options reportDir=cypress/reports/json,overwrite=false,html=false,json=true \
-            --env grepTags=@API,grepFilterSpecs=true
+        run: npm run api:tests
         env:
           CI: true
-          CYPRESS_BASE_URL: ${{ env.BACKEND_URL }}
-          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}/api
-          CYPRESS_TODO_APP_URL: ${{ env.FRONTEND_URL }}
 
-      # Step 2: Smoke Tests
+      # Step 2: Smoke Tests (only if API passed)
       - name: Run Smoke Tests
-        if: success()
+        if: success()  # only run if previous step succeeded
         id: smoke
-        run: |
-          cd "Automation Framework"
-          npx cypress run --reporter mochawesome \
-            --reporter-options reportDir=cypress/reports/json,overwrite=false,html=false,json=true \
-            --env grepTags=@Smoke,grepFilterSpecs=true
+        run: npm run e2e:smoke:tests
         env:
           CI: true
-          CYPRESS_BASE_URL: ${{ env.FRONTEND_URL }}
-          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}/api
-          CYPRESS_TODO_APP_URL: ${{ env.FRONTEND_URL }}
 
-      # Step 3: Regression Tests
+      # Step 3: Regression Tests (only if Smoke passed)
       - name: Run Regression Tests
-        if: success()
-        run: |
-          cd "Automation Framework"
-          npx cypress run --reporter mochawesome \
-            --reporter-options reportDir=cypress/reports/json,overwrite=false,html=false,json=true \
-            --env grepTags=@Regression,grepFilterSpecs=true
+        if: success()  # only run if smoke succeeded
+        run: npm run e2e:regression:tests
         env:
           CI: true
-          CYPRESS_BASE_URL: ${{ env.FRONTEND_URL }}
-          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}/api
-          CYPRESS_TODO_APP_URL: ${{ env.FRONTEND_URL }}
 
-      # Merge JSON reports and create combined HTML
-      - name: Merge Reports and Generate HTML
-        if: always()
-        run: |
-          cd "Automation Framework"
-          npx mochawesome-merge cypress/reports/json/*.json > cypress/reports/json/combined.json
-          npx marge cypress/reports/json/combined.json --reportDir cypress/reports/html --inline
-
-      # Upload combined HTML report
-      - name: Upload Combined Cypress Report
+      # Upload reports
+      - name: Upload Cypress Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Combined-Cypress-Report
+          name: Cypress-Reports
           path: Automation Framework/cypress/reports/html
-
-      
