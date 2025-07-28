@@ -68,36 +68,58 @@ jobs:
         id: api
         run: |
           cd "Automation Framework"
-          npx cypress run --env grepTags=@API,grepFilterSpecs=true
+          npx cypress run --reporter mochawesome \
+            --reporter-options reportDir=cypress/reports/json,overwrite=false,html=false,json=true \
+            --env grepTags=@API,grepFilterSpecs=true
         env:
           CI: true
           CYPRESS_BASE_URL: ${{ env.BACKEND_URL }}
+          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}/api
+          CYPRESS_TODO_APP_URL: ${{ env.FRONTEND_URL }}
 
-      # Step 2: Smoke Tests (only if API passed)
+      # Step 2: Smoke Tests
       - name: Run Smoke Tests
-        if: success()  # only run if previous step succeeded
+        if: success()
         id: smoke
         run: |
           cd "Automation Framework"
-          npx cypress run --env grepTags=@Smoke,grepFilterSpecs=true
+          npx cypress run --reporter mochawesome \
+            --reporter-options reportDir=cypress/reports/json,overwrite=false,html=false,json=true \
+            --env grepTags=@Smoke,grepFilterSpecs=true
         env:
           CI: true
           CYPRESS_BASE_URL: ${{ env.FRONTEND_URL }}
+          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}/api
+          CYPRESS_TODO_APP_URL: ${{ env.FRONTEND_URL }}
 
-      # Step 3: Regression Tests (only if Smoke passed)
+      # Step 3: Regression Tests
       - name: Run Regression Tests
-        if: success()  # only run if smoke succeeded
+        if: success()
         run: |
           cd "Automation Framework"
-          npx cypress run --env grepTags=@Regression,grepFilterSpecs=true
+          npx cypress run --reporter mochawesome \
+            --reporter-options reportDir=cypress/reports/json,overwrite=false,html=false,json=true \
+            --env grepTags=@Regression,grepFilterSpecs=true
         env:
           CI: true
           CYPRESS_BASE_URL: ${{ env.FRONTEND_URL }}
+          CYPRESS_TODO_API_URL: ${{ env.BACKEND_URL }}/api
+          CYPRESS_TODO_APP_URL: ${{ env.FRONTEND_URL }}
 
-      # Upload reports
-      - name: Upload Cypress Reports
+      # Merge JSON reports and create combined HTML
+      - name: Merge Reports and Generate HTML
+        if: always()
+        run: |
+          cd "Automation Framework"
+          npx mochawesome-merge cypress/reports/json/*.json > cypress/reports/json/combined.json
+          npx marge cypress/reports/json/combined.json --reportDir cypress/reports/html --inline
+
+      # Upload combined HTML report
+      - name: Upload Combined Cypress Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Cypress-Reports
+          name: Combined-Cypress-Report
           path: Automation Framework/cypress/reports/html
+
+      
