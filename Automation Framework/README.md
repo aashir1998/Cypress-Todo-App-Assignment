@@ -1,178 +1,215 @@
-# Automation Framework
+# Automation Framework - Technical Documentation
 
-This folder contains the complete Cypress automation framework for testing Aashir's Todo App.
+This directory contains the Cypress automation framework for testing the Todo application. 
 
-## 🏗️ Structure
+## 🏗️ **Framework Architecture**
 
 ```
 Automation Framework/
-├── cypress/                    # Cypress testing framework
-│   ├── e2e/                   # End-to-end tests
-│   │   ├── login/             # Login test specifications
-│   │   └── ui/                # UI test specifications
-│   ├── fixtures/              # Test data files
-│   ├── support/               # Custom commands and utilities
-│   ├── screenshots/           # Test screenshots
-│   ├── reports/               # Test execution reports
-│   └── downloads/             # Downloaded files
-├── cypress.config.js          # Cypress configuration
-├── eslint.config.js           # ESLint configuration
-├── .prettierrc               # Prettier configuration
-├── .prettierignore           # Prettier ignore rules
+├── cypress/
+│   ├── e2e/                   # Test specifications
+│   │   ├── api/              # API test suites
+│   │   ├── login/            # Authentication tests
+│   │   └── todo/             # Todo CRUD tests
+│   ├── fixtures/             # Test data and configurations
+│   ├── support/              # Custom commands and utilities
+│   ├── reports/              # Test execution reports
+│   └── screenshots/          # Failure screenshots
+├── cypress.config.js         # Cypress configuration
+├── package.json              # Framework dependencies
 └── README.md                 # This file
 ```
 
-## 🧪 Test Structure
+## 🧪 **Test Organization**
 
-### Login Tests (`cypress/e2e/login/`)
+### **API Tests** (`cypress/e2e/api/`)
+- **`get-todos-api.cy.js`** - GET endpoint validation
+- **`post-todos-api.cy.js`** - POST endpoint validation
+- **`put-todos-api.cy.js`** - PUT endpoint validation
+- **`patch-todos-api.cy.js`** - PATCH endpoint validation
+- **`delete-todos-api.cy.js`** - DELETE endpoint validation
+- **`login-api.cy.js`** - Authentication API validation
 
-- **`login-with-valid-user.cy.js`** - Tests for successful login scenarios
-- **`login-with-invalid-user.cy.js`** - Tests for failed login scenarios
+### **Login Tests** (`cypress/e2e/login/`)
+- **`login-with-valid-user.cy.js`** - Successful authentication flows
+- **`login-with-invalid-user.cy.js`** - Failed authentication scenarios
 
-### UI Tests (`cypress/e2e/ui/`)
+### **Todo Tests** (`cypress/e2e/todo/`)
+- **`create-todo.cy.js`** - Todo creation workflows
+- **`edit-todo.cy.js`** - Todo editing functionality
+- **`toggle-todo.cy.js`** - Todo completion toggling
+- **`delete-todo.cy.js`** - Todo deletion workflows
 
-- **`todo-app-ui.cy.js`** - Comprehensive UI tests for the Todo application
+## 🔧 **Framework Components**
 
-### Support Files (`cypress/support/`)
-
-- **`Login.js`** - Page Object Model for login functionality
+### **Support Files** (`cypress/support/`)
+- **`Login.js`** - Login page object model
+- **`Todo-Api.js`** - API interaction utilities
+- **`Todo.js`** - Todo page object model
 - **`commands.js`** - Custom Cypress commands
 - **`e2e.js`** - Cypress support configuration
 
-### Test Data (`cypress/fixtures/`)
+### **Test Data** (`cypress/fixtures/`)
+- **`testData.json`** - Centralized test data for all scenarios
 
-- **`testData.json`** - Test data for login scenarios
+## 🎯 **Framework Features**
 
-## 🚀 Running Tests
+### **Page Object Model**
+```javascript
+// Example: Login.js
+export default class Login {
+  constructor() {
+    this.emailInput = '[data-automation-id="email-input"]';
+    this.passwordInput = '[data-automation-id="password-input"]';
+    this.loginButton = '[data-automation-id="login-button"]';
+  }
 
-### From Root Directory
-
-```bash
-# Run all tests
-npm run test:all
-
-# Open Cypress Test Runner
-npm run cy:open
-
-# Run specific test types
-npm run e2e:smoke:tests
-npm run e2e:regression:tests
-npm run ui:tests
+  login(email, password) {
+    cy.get(this.emailInput).type(email);
+    cy.get(this.passwordInput).type(password);
+    cy.get(this.loginButton).click();
+  }
+}
 ```
 
-### From Automation Framework Directory
+### **Custom Commands**
+```javascript
+// Example: commands.js
+Cypress.Commands.add('assertSuccessResponse', (response) => {
+  expect(response.status).to.equal(200);
+  expect(response.body.success).to.be.true;
+});
 
+Cypress.Commands.add('assertTodoStructure', (todo) => {
+  expect(todo).to.have.property('id');
+  expect(todo).to.have.property('title');
+  expect(todo).to.have.property('completed');
+});
+```
+
+### **Test Tagging System**
+```javascript
+// Example test with tags
+describe('GET Todos API', { tags: '@API' }, () => {
+  it('retrieves all todos successfully', { tags: '@Smoke' }, () => {
+    // Test implementation
+  });
+});
+```
+
+## 🚀 **Local Development Commands**
+
+### **From Automation Framework Directory**
 ```bash
 cd "Automation Framework"
 
-# Run all tests
-cypress run
-
-# Open Cypress Test Runner
+# Open Cypress Test Runner (GUI)
 cypress open
 
-# Run specific test files
+# Run all tests (headless)
+cypress run
+
+# Run specific test suites
+cypress run --spec "cypress/e2e/api/**/*.cy.js"
 cypress run --spec "cypress/e2e/login/**/*.cy.js"
-cypress run --spec "cypress/e2e/ui/**/*.cy.js"
+cypress run --spec "cypress/e2e/todo/**/*.cy.js"
+
+# Run with specific tags
+cypress run --env grepTags=@API
+cypress run --env grepTags=@Smoke
+cypress run --env grepTags=@Regression
 ```
 
-## 🎯 Test Features
+### **Environment Variables**
+```bash
+# Create .env file in Automation Framework/
+CYPRESS_BASE_URL=http://localhost:3000
+CYPRESS_API_BASE_URL=http://localhost:3001/api
+CYPRESS_VIDEO=true
+CYPRESS_SCREENSHOTS=true
+```
 
-### Login Testing
+## 📊 **Test Reports & Artifacts**
 
-- ✅ Valid user login scenarios
-- ✅ Invalid user login scenarios
-- ✅ Form validation testing
-- ✅ Error message verification
-- ✅ Password visibility toggle
-- ✅ Form state management
+### **Report Locations**
+- **HTML Reports**: `cypress/reports/html/`
+- **Screenshots**: `cypress/screenshots/`
+- **Videos**: `cypress/videos/`
 
-### UI Testing
-
-- ✅ Todo creation, editing, deletion
-- ✅ Todo completion and filtering
-- ✅ Search functionality
-- ✅ Bulk operations
-- ✅ Statistics verification
-- ✅ Responsive design testing
-
-### Framework Features
-
-- ✅ Page Object Model implementation
-- ✅ Custom Cypress commands
-- ✅ Data-driven testing
-- ✅ Comprehensive error handling
-- ✅ Stable selectors with data-automation-id
-- ✅ Cross-browser testing support
-- ✅ Mobile and tablet viewport testing
-
-## 🔧 Configuration
-
-### Cypress Configuration (`cypress.config.js`)
-
-- Custom viewport settings
-- Timeout configurations
-- Reporter settings
-- Environment variables
-- Test retry logic
-
-### ESLint Configuration (`eslint.config.js`)
-
-- Code quality rules
-- Cypress-specific linting
-- Best practices enforcement
-
-### Prettier Configuration (`.prettierrc`)
-
-- Code formatting rules
-- Consistent code style
-
-## 📊 Test Reports
-
-Cypress generates comprehensive test reports including:
-
-- **Mochawesome Reports**: HTML-based detailed reports
-- **Screenshots**: Failed test screenshots
-- **Videos**: Test execution recordings
+### **Report Features**
+- **Mochawesome Reports**: Detailed HTML reports with screenshots
+- **Test Execution Videos**: Recorded test runs for debugging
+- **Failure Screenshots**: Automatic capture on test failures
 - **Console Logs**: Detailed execution logs
 
-Reports are generated in the `cypress/reports/` directory.
+## 🔧 **Configuration Details**
 
-## 🎯 Best Practices
+### **Cypress Configuration** (`cypress.config.js`)
+```javascript
+module.exports = defineConfig({
+  reporter: 'cypress-mochawesome-reporter',
+  chromeWebSecurity: false,
+  pageLoadTimeout: 120000,
+  defaultCommandTimeout: 10000,
+  viewportWidth: 1920,
+  viewportHeight: 1080,
+  retries: {
+    runMode: 1,
+    openMode: 0
+  },
+  env: {
+    grepFilterSpecs: true,
+    grepOmitFiltered: true
+  }
+});
+```
 
-### Page Object Model
+### **Test Retry Logic**
+- **Run Mode**: 1 retry for flaky tests
+- **Open Mode**: 0 retries for interactive debugging
 
-- All page interactions are abstracted into reusable classes
-- Selectors are centralized and maintainable
-- Methods are descriptive and reusable
+### **Timeout Settings**
+- **Page Load**: 120 seconds
+- **Default Command**: 10 seconds
+- **Request Timeout**: 120 seconds
 
-### Test Data Management
+## 🎯 **Best Practices**
 
-- Test data is externalized in JSON fixtures
-- Data is organized by test scenarios
-- Easy to maintain and update
+### **Selector Strategy**
+- **Data Automation IDs**: Primary selector strategy
+- **Stable Selectors**: Avoid CSS classes that change frequently
+- **Descriptive Names**: Clear, meaningful automation IDs
 
-### Custom Commands
+### **Test Data Management**
+- **Externalized Data**: All test data in JSON fixtures
+- **Scenario-Based**: Organized by test scenarios
+- **Maintainable**: Easy to update and extend
 
-- Reusable commands for common operations
-- Consistent test implementation
-- Reduced code duplication
+### **Error Handling**
+- **Comprehensive Coverage**: All error scenarios tested
+- **Clear Assertions**: Descriptive error messages
+- **Robust Execution**: Graceful handling of failures
 
-### Error Handling
+### **Code Quality**
+- **ESLint**: Code quality enforcement
+- **Prettier**: Consistent formatting
+- **Custom Rules**: Cypress-specific linting
 
-- Comprehensive error scenarios covered
-- Clear error messages and assertions
-- Robust test execution
+## 🚀 **CI/CD Integration**
 
-## 🚀 Continuous Integration
+### **Pipeline Support**
+- **Parallel Execution**: Optimized for CI environments
+- **Cross-Browser Testing**: Chrome, Firefox, Edge support
+- **Multiple Viewports**: Mobile and tablet testing
+- **Conditional Execution**: Shift-left testing strategy
 
-The framework is designed to work seamlessly with CI/CD pipelines:
-
-- Parallel test execution support
-- Cross-browser testing
-- Multiple viewport testing
-- Comprehensive reporting
+### **Environment Variables for CI**
+```bash
+CI=true
+CYPRESS_BASE_URL=http://localhost:3000
+CYPRESS_API_BASE_URL=http://localhost:3001/api
+```
 
 ---
 
-**Happy Testing! 🎉**
+**For setup instructions and usage, see the main [README.md](../README.md) in the root directory.**
