@@ -34,7 +34,7 @@ module.exports = defineConfig({
       openMode: 0
     },
 
-    baseUrl: process.env.CYPRESS_BASE_URL || 'http://localhost:3000',
+    baseUrl: process.env.CYPRESS_BASE_URL,
 
     // Test file patterns - simplified to catch all test files
     specPattern: ['cypress/e2e/**/*.cy.js']

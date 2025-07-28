@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 
 class LoginApi {
   constructor() {
-    this.baseUrl = Cypress.env('todoApiUrl') || 'http://localhost:3001/api';
+    this.baseUrl = Cypress.env('todoApiUrl');
     this.timeout = 10000;
   }
 
