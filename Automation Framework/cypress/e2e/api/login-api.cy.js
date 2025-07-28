@@ -18,6 +18,8 @@ describe('Login API', { tags: '@API' }, () => {
       failOnStatusCode: false
     }).then((res) => {
       cy.assertSuccessResponse(res);
+      // Check if response.body.data exists before accessing its properties
+      expect(res.body.data).to.exist;
       expect(res.body.data).to.have.keys(['total', 'completed', 'active', 'completionRate']);
     });
   });

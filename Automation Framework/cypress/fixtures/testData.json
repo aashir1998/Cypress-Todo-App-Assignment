@@ -45,7 +45,7 @@
     },
     "invalidTodo": {
       "title": "",
-      "completed": "invalid"
+      "completed": false
     },
     "updateData": {
       "title": "Updated Todo Item",

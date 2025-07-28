@@ -22,6 +22,9 @@ Cypress.Commands.add('assertNotFoundError', (response, expectedError = 'Not foun
 });
 
 Cypress.Commands.add('assertTodoStructure', (todo) => {
+  // Ensure todo object exists before checking properties
+  expect(todo).to.exist;
+  expect(todo).to.be.an('object');
   expect(todo).to.have.keys(['id', 'title', 'completed', 'createdAt', 'updatedAt']);
   expect(todo.id).to.be.a('string');
   expect(todo.title).to.be.a('string');

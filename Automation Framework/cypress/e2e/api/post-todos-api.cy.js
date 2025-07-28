@@ -16,6 +16,9 @@ describe('POST Todos API', { tags: '@API' }, () => {
 
     api.createTodo(todoData).then((res) => {
       cy.assertSuccessResponse(res, 201);
+      // Ensure response has the expected structure before asserting
+      expect(res.body).to.have.property('data');
+      expect(res.body.data).to.have.property('title');
       cy.assertTodoStructure(res.body.data);
       expect(res.body.data.title).to.equal(todoData.title);
     });
