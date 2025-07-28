@@ -1,91 +1,106 @@
-# Cypress Todo App Assignment
+# Cypress Todo App Automation Framework
 
 A comprehensive **automation testing framework** for a full-stack Todo application built with React frontend, Node.js backend, and Cypress E2E testing.
 
-## 🎯 **Project Focus: Automation Framework**
+## 📋 **Test Plan & Strategy**
 
-This project is primarily designed as a **complete automation testing framework** that demonstrates:
+### **What is Being Tested**
 
-- **End-to-End Testing** with Cypress
-- **API Testing** for REST endpoints
-- **UI Testing** for React components
-- **Cross-browser Testing** (Chrome, Firefox, Edge)
-- **Mobile & Tablet Testing**
-- **Parallel Test Execution**
-- **Comprehensive Test Reporting**
+This framework provides comprehensive testing coverage for a Todo application including:
+
+- **🔐 Authentication**: Login functionality with valid/invalid credentials
+- **🎨 UI Components**: React frontend interactions and user experience
+- **🔌 API Endpoints**: REST API validation for CRUD operations
+- **💨 Smoke Tests**: Critical functionality validation
+- **🔄 Regression Tests**: Comprehensive feature testing
+
+### **Test Coverage Areas**
+
+| Test Category | Coverage | Tags |
+|---------------|----------|------|
+| **API Tests** | REST endpoints (GET, POST, PUT, PATCH, DELETE) | `@API` |
+| **Login Tests** | Authentication scenarios | `@Login` |
+| **Todo CRUD** | Create, Read, Update, Delete operations | `@Todo` |
+| **Smoke Tests** | Critical path validation | `@Smoke` |
+| **Regression Tests** | Full feature testing | `@Regression` |
+
+### **Tools Used and Why**
+
+- **Cypress**: Modern E2E testing framework with excellent debugging capabilities
+- **@cypress/grep**: Test filtering and tagging for selective execution
+- **cypress-mochawesome-reporter**: Professional HTML reporting with screenshots
+- **@faker-js/faker**: Dynamic test data generation
+- **cypress-plugin-api**: Enhanced API testing capabilities
+
 
 ## 🏗️ **Project Structure**
+
+This is a **monorepo** containing three main components:
 
 ```
 ├── Automation Framework/        # 🧪 Complete testing framework
 │   ├── cypress/               # Cypress testing framework
 │   │   ├── e2e/              # End-to-end tests
 │   │   │   ├── api/          # API test suites
-│   │   │   ├── ui/           # UI test suites
-│   │   │   └── login/        # Authentication tests
+│   │   │   ├── login/        # Authentication tests
+│   │   │   └── todo/         # Todo CRUD tests
 │   │   ├── fixtures/         # Test data and configurations
 │   │   ├── support/          # Custom commands and utilities
 │   │   └── reports/          # Test execution reports
 │   ├── cypress.config.js     # Cypress configuration
-│   ├── eslint.config.js      # ESLint configuration
-│   └── .prettierrc          # Prettier configuration
+│   └── package.json          # Testing dependencies
 ├── Todo App/                    # 🎨 Demo application (for testing)
 │   ├── frontend/               # React frontend application
 │   └── backend/                # Node.js backend API
 └── package.json               # Root package.json with unified scripts
 ```
 
-## 🚀 **Quick Start**
+## 🚀 **Setup & Installation**
 
-### Prerequisites
+### **Prerequisites**
 
 - Node.js >= 16.0.0
 - npm >= 8.0.0
 
-### Installation
+### **Step-by-Step Setup**
 
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone https://github.com/aashir1998/Cypress-Todo-App-Assignment.git
 cd Cypress-Todo-App-Assignment
 
-# Install all dependencies (Cypress, Backend, Frontend)
-npm install
-```
+# 2. Install all dependencies (Root, Frontend, Backend, Cypress)
+npm run install:all
 
-### Start the Application
+# 3. Verify Cypress installation
+npm run cy:verify
 
-```bash
-# Start both frontend and backend servers
+# 4. Start both frontend and backend servers
 npm start
 ```
 
 This will start:
-
 - **Frontend**: http://localhost:3000
 - **Backend**: http://localhost:3001
 
-## 🧪 **Automation Framework Features**
+### **Verification Steps**
 
-### **Test Categories**
+After setup, verify everything is working:
 
-- **🔐 Login Tests**: Authentication scenarios and user flows
-- **🎨 UI Tests**: Frontend component interactions and user experience
-- **🔌 API Tests**: REST API endpoint validation and data integrity
-- **💨 Smoke Tests**: Critical functionality validation
-- **🔄 Regression Tests**: Comprehensive feature testing
+```bash
+# Check if servers are running
+curl http://localhost:3000  # Frontend should respond
+curl http://localhost:3001/health  # Backend health check
 
-### **Testing Capabilities**
+# Open Cypress Test Runner (GUI)
+npm run cy:open
+```
 
-- **Cross-browser Testing**: Chrome, Firefox, Edge support
-- **Responsive Testing**: Mobile (375x667) and Tablet (768x1024) viewports
-- **Parallel Execution**: CI/CD optimized test runs
-- **Visual Regression**: Screenshot comparison testing
-- **API Testing**: RESTful API validation with custom commands
-- **Data Management**: Faker.js for dynamic test data
-- **Reporting**: Mochawesome HTML reports with screenshots
+## 🧪 **Cypress Implementation Details**
 
 ### **Framework Architecture**
+
+The testing framework follows modern automation best practices:
 
 - **Page Object Model**: Maintainable and reusable test structure
 - **Custom Commands**: Reusable test utilities and helpers
@@ -93,7 +108,46 @@ This will start:
 - **Environment Configuration**: Flexible setup for different environments
 - **Error Handling**: Robust error management and retry mechanisms
 
-## 🛠️ **Available Scripts**
+### **Test Organization**
+
+```
+cypress/e2e/
+├── api/                    # API test suites
+│   ├── get-todos-api.cy.js
+│   ├── post-todos-api.cy.js
+│   ├── put-todos-api.cy.js
+│   ├── patch-todos-api.cy.js
+│   ├── delete-todos-api.cy.js
+│   └── login-api.cy.js
+├── login/                  # Authentication tests
+│   ├── login-with-valid-user.cy.js
+│   └── login-with-invalid-user.cy.js
+└── todo/                   # Todo CRUD tests
+    ├── create-todo.cy.js
+    ├── edit-todo.cy.js
+    ├── toggle-todo.cy.js
+    └── delete-todo.cy.js
+```
+
+### **Custom Tags for Selective Testing**
+
+The framework uses custom tags to organize and run specific test suites:
+
+```javascript
+// Example test with tags
+describe('GET Todos API', { tags: '@API' }, () => {
+  // Test implementation
+});
+```
+
+**Available Tags:**
+- `@API` - API endpoint tests
+- `@Login` - Authentication tests
+- `@Todo` - Todo CRUD operations
+- `@Smoke` - Critical functionality
+- `@Regression` - Comprehensive testing
+
+## 🛠️ **Available Commands**
 
 ### **Application Commands**
 
@@ -106,39 +160,142 @@ npm run start:frontend       # Start only the frontend server
 ### **Testing Commands**
 
 ```bash
+# Cypress Test Runner
 npm run cy:open              # Open Cypress test runner (GUI)
 npm run cy:run               # Run Cypress tests in headless mode
-npm run test:all             # Run all Cypress tests
-npm run test:headed          # Run tests with browser visible
-npm run test:chrome          # Run tests in Chrome browser
-npm run test:firefox         # Run tests in Firefox browser
-npm run test:edge            # Run tests in Edge browser
-npm run test:mobile          # Run tests with mobile viewport
-npm run test:tablet          # Run tests with tablet viewport
-npm run test:parallel        # Run tests in parallel mode
-```
 
-### **Test Suite Commands**
-
-```bash
+# Specific Test Suites
+npm run api:tests            # Run API test suite only
 npm run e2e:smoke:tests      # Run smoke test suite
 npm run e2e:regression:tests # Run regression test suite
-npm run api:tests            # Run API test suite only
-npm run ui:tests             # Run UI test suite only
 ```
 
-### **Code Quality**
+### **Running Tests Based on Use Cases**
+
+#### **🔌 API Testing**
+```bash
+npm run api:tests
+```
+**When to use:** 
+- Testing backend API endpoints
+- Validating data integrity
+- Performance testing of API responses
+- Integration testing with external services
+
+#### **💨 Smoke Testing**
+```bash
+npm run e2e:smoke:tests
+```
+**When to use:**
+- Quick validation of critical functionality
+- Pre-deployment verification
+- Daily health checks
+- Fast feedback on core features
+
+#### **🔄 Regression Testing**
+```bash
+npm run e2e:regression:tests
+```
+**When to use:**
+- Comprehensive feature testing
+- Full application validation
+- Release candidate testing
+- Complete user journey validation
+
+#### **🎯 Complete Test Suite**
+```bash
+npm run cy:run
+```
+**When to use:**
+- Running all tests together
+- Full regression testing
+- Pre-release validation
+- Comprehensive quality assurance
+
+### **Code Quality Commands**
 
 ```bash
-npm run prettier-format      # Format code with Prettier
+npm run format               # Format code with Prettier
 npm run cy:verify            # Verify Cypress installation
+npm run format:check         # Check code formatting
+npm run lint                 # Run linting for frontend and backend
+npm run code:check           # Check both formatting and linting
+```
+
+## 🚀 **GitHub Actions Pipeline (Shift-Left Testing)**
+
+The project implements a **shift-left testing strategy** with a comprehensive CI/CD pipeline that runs automatically on:
+
+- **Push to master branch**
+- **Pull requests to master branch**
+
+### **Pipeline Strategy: Early Issue Detection**
+
+The pipeline follows a **sequential execution strategy** to catch issues early and promote shift-left testing:
+
+#### **Stage 1: API Tests** 🔌
+```bash
+npm run api:tests
+```
+- **Purpose**: Validate backend API endpoints first
+- **Why Early**: API issues are fundamental and affect all other tests
+- **Failure Impact**: If API tests fail, subsequent tests are blocked
+
+#### **Stage 2: Smoke Tests** 💨 (Only if API passes)
+```bash
+npm run e2e:smoke:tests
+```
+- **Purpose**: Validate critical user functionality
+- **Condition**: Only runs if all API tests pass
+- **Why Sequential**: Ensures basic functionality before comprehensive testing
+
+#### **Stage 3: Regression Tests** 🔄 (Only if Smoke passes)
+```bash
+npm run e2e:regression:tests
+```
+- **Purpose**: Comprehensive feature validation
+- **Condition**: Only runs if all smoke tests pass
+- **Why Last**: Most comprehensive and time-consuming tests
+
+### **Shift-Left Benefits**
+
+✅ **Early Issue Detection**: API problems caught before UI testing  
+✅ **Faster Feedback**: Fail fast, fail early approach  
+✅ **Resource Efficiency**: Prevents expensive tests when basics fail  
+✅ **Quality Gates**: Each stage acts as a quality checkpoint  
+✅ **Reduced Costs**: Issues caught earlier cost less to fix  
+
+### **Pipeline Commands**
+
+```bash
+# Local pipeline simulation
+npm run e2e:smoke:tests:ci      # Run smoke tests in CI mode
+npm run e2e:regression:tests:ci # Run regression tests in CI mode
+```
+
+### **Pipeline Flow**
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   API Tests     │───▶│  Smoke Tests    │───▶│ Regression Tests│
+│   (Stage 1)     │    │   (Stage 2)     │    │   (Stage 3)     │
+│                 │    │                 │    │                 │
+│ • GET /todos    │    │ • Login         │    │ • Full CRUD     │
+│ • POST /todos   │    │ • Create Todo   │    │ • Search/Filter │
+│ • PUT /todos    │    │ • Basic UI      │    │ • All Features  │
+│ • DELETE /todos │    │ • Navigation    │    │ • Edge Cases    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+        │                       │                       │
+        ▼                       ▼                       ▼
+   ❌ Block if fail        ❌ Block if fail        ❌ Block if fail
+   ✅ Continue if pass     ✅ Continue if pass     ✅ Continue if pass
 ```
 
 ## 📊 **Test Reports**
 
 After running tests, comprehensive reports are generated in:
 
-- **HTML Reports**: `Automation Framework/cypress/reports/`
+- **HTML Reports**: `Automation Framework/cypress/reports/html/`
 - **Screenshots**: `Automation Framework/cypress/screenshots/`
 - **Videos**: `Automation Framework/cypress/videos/`
 
@@ -147,8 +304,7 @@ After running tests, comprehensive reports are generated in:
 The Todo App serves as a testing target and includes:
 
 ### **Frontend (React)**
-
-- Modern UI with Tailwind CSS and Framer Motion
+- Modern UI with Tailwind CSS
 - Real-time search and filtering
 - Responsive design for all devices
 - User authentication system
@@ -156,7 +312,6 @@ The Todo App serves as a testing target and includes:
 - Statistics dashboard
 
 ### **Backend (Node.js)**
-
 - RESTful API with Express.js
 - Security middleware (Helmet, CORS, Rate Limiting)
 - Input validation and error handling
@@ -176,35 +331,13 @@ The Todo App serves as a testing target and includes:
 ### **Environment Variables**
 
 ```bash
-# Create .env file in Automation Framework/
+# Create .env file in Root directory
 CYPRESS_BASE_URL=http://localhost:3000
 CYPRESS_API_BASE_URL=http://localhost:3001/api
 CYPRESS_VIDEO=true
 CYPRESS_SCREENSHOTS=true
 ```
 
-## 🚀 **CI/CD Integration**
-
-The framework is optimized for continuous integration:
-
-- **Parallel execution** support
-- **Cross-browser testing** in CI environments
-- **Video recording** for debugging
-- **Screenshot capture** on failures
-- **HTML reporting** for test results
-
-## 📝 **Contributing**
-
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
-
-## 📄 **License**
-
-This project is licensed under the ISC License.
-
 ---
 
-**Built with ❤️ by Aashir Ahmed**
+**Built  by Aashir Ahmed**

@@ -16,6 +16,7 @@
     "start:frontend": "cd 'Todo App/frontend' && npm start",
     "start": "cd 'Todo App/backend' && npm start & cd 'Todo App/frontend' && npm start & wait",
     "cy:verify": "cd 'Automation Framework' && cypress verify",
+    "cy:open": "cd 'Automation Framework' && cypress open",
     "cy:run": "cd 'Automation Framework' && cypress run",
     "e2e:regression:tests": "cd 'Automation Framework' && cypress run --env grepTags=@Regression,grepFilterSpecs=true",
     "e2e:regression:tests:ci": "cd 'Automation Framework' && cypress run --env grepTags=@Regression,grepFilterSpecs=true",
